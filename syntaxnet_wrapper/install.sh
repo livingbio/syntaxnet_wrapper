@@ -7,7 +7,6 @@ wget https://github.com/bazelbuild/bazel/releases/download/0.2.2b/bazel-0.2.2b-i
 chmod +x bazel-0.2.2b-installer-linux-x86_64.sh
 ./bazel-0.2.2b-installer-linux-x86_64.sh --user
 rm bazel-0.2.2b-installer-linux-x86_64.sh
-export PATH=$PATH:~/bin
 
 #
 # SyntaxNet original version (installed as a normal user)
@@ -20,8 +19,7 @@ git clone --recursive https://github.com/tensorflow/models.git
 cd models/syntaxnet/tensorflow
 ./configure < /dev/null  # no Google Cloud Platform support, no GPU support
 cd ..
-export PATH=$PATH:~/bin
-bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/...
+~/bin/bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/...
 # The --output_user_root ensures that all of the build output is
 # stored within the syntaxnet directory. Otherwise bazel puts files
 # in ~/.cache/bazel and makes ridiculous symlinks to it all over
