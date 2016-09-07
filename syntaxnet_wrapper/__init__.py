@@ -150,4 +150,4 @@ class SyntaxNetParser(object):
             pass
         if returnRaw:
             return '\n'.join(results)
-        return [r.split('\t') for r in results]
+        return [r.split('\t') for r in results[:-1]]
