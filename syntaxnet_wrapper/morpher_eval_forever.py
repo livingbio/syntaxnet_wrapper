@@ -18,8 +18,8 @@ from syntaxnet import structured_graph_builder
 from syntaxnet.ops import gen_parser_ops
 from syntaxnet import task_spec_pb2
 
-parser_hidden_layer_sizes = '512,512'
-parser_arg_prefix = 'brain_parser'
+morpher_hidden_layer_sizes = '64'
+morpher_arg_prefix = 'brain_morpher'
 graph_builder = 'structured'
 slim_model = True
 batch_size = 1
@@ -27,11 +27,7 @@ beam_size = 8
 max_steps = 1000
 resource_dir = sys.argv[1]
 context_path = sys.argv[2]
-if resource_dir.endswith('syntaxnet'):
-    parser_model_path = os.path.join(resource_dir, 'syntaxnet/models/parsey_mcparseface')
-else:
-    parser_model_path = resource_dir
-parser_model_path = os.path.join(parser_model_path, 'parser-params')
+morpher_model_path = os.path.join(resource_dir, 'morpher-params')
 
 
 def RewriteContext(task_context):
@@ -51,18 +47,18 @@ sess = tf.Session()
 
 task_context = RewriteContext(context_path)
 feature_sizes, domain_sizes, embedding_dims, num_actions = sess.run(
-    gen_parser_ops.feature_size(task_context=task_context, arg_prefix=parser_arg_prefix))
-hidden_layer_sizes = map(int, parser_hidden_layer_sizes.split(','))
-parser = structured_graph_builder.StructuredGraphBuilder(
+    gen_parser_ops.feature_size(task_context=task_context, arg_prefix=morpher_arg_prefix))
+hidden_layer_sizes = map(int, morpher_hidden_layer_sizes.split(','))
+morpher = structured_graph_builder.StructuredGraphBuilder(
     num_actions, feature_sizes, domain_sizes, embedding_dims,
-    hidden_layer_sizes, gate_gradients=True, arg_prefix=parser_arg_prefix,
+    hidden_layer_sizes, gate_gradients=True, arg_prefix=morpher_arg_prefix,
     beam_size=beam_size, max_steps=max_steps)
-parser.AddEvaluation(task_context, batch_size, corpus_name='stdin-conll',
+morpher.AddEvaluation(task_context, batch_size, corpus_name='stdin',
     evaluation_max_steps=max_steps)
 
-parser.AddSaver(slim_model)
-sess.run(parser.inits.values())
-parser.saver.restore(sess, parser_model_path)
+morpher.AddSaver(slim_model)
+sess.run(morpher.inits.values())
+morpher.saver.restore(sess, morpher_model_path)
 
 sink_documents = tf.placeholder(tf.string)
 sink = gen_parser_ops.document_sink(sink_documents, task_context=task_context,
@@ -70,9 +66,9 @@ sink = gen_parser_ops.document_sink(sink_documents, task_context=task_context,
 
 while True:
     tf_eval_epochs, tf_eval_metrics, tf_documents = sess.run([
-        parser.evaluation['epochs'],
-        parser.evaluation['eval_metrics'],
-        parser.evaluation['documents'],
+        morpher.evaluation['epochs'],
+        morpher.evaluation['eval_metrics'],
+        morpher.evaluation['documents'],
     ])
 
     if len(tf_documents):

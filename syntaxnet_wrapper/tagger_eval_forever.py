@@ -19,9 +19,7 @@ from syntaxnet.ops import gen_parser_ops
 from syntaxnet import task_spec_pb2
 
 tagger_hidden_layer_sizes = '64'
-parser_hidden_layer_sizes = '512,512'
 tagger_arg_prefix = 'brain_tagger'
-parser_arg_prefix = 'brain_parser'
 graph_builder = 'structured'
 slim_model = True
 batch_size = 1
@@ -29,8 +27,13 @@ beam_size = 8
 max_steps = 1000
 resource_dir = sys.argv[1]
 context_path = sys.argv[2]
-tagger_model_path = os.path.join(resource_dir, 'tagger-params')
-parser_model_path = os.path.join(resource_dir, 'parser-params')
+if resource_dir.endswith('syntaxnet'):
+    input_style = 'stdin'
+    tagger_model_path = os.path.join(resource_dir, 'syntaxnet/models/parsey_mcparseface')
+else:
+    input_style = 'stdin-conll'
+    tagger_model_path = resource_dir
+tagger_model_path = os.path.join(tagger_model_path, 'tagger-params')
 
 
 def RewriteContext(task_context):
@@ -56,7 +59,7 @@ tagger = structured_graph_builder.StructuredGraphBuilder(
     num_actions, feature_sizes, domain_sizes, embedding_dims,
     hidden_layer_sizes, gate_gradients=True, arg_prefix=tagger_arg_prefix,
     beam_size=beam_size, max_steps=max_steps)
-tagger.AddEvaluation(task_context, batch_size, corpus_name='stdin',
+tagger.AddEvaluation(task_context, batch_size, corpus_name=input_style,
     evaluation_max_steps=max_steps)
 
 tagger.AddSaver(slim_model)
@@ -76,3 +79,5 @@ while True:
 
     if len(tf_documents):
         sess.run(sink, feed_dict={sink_documents: tf_documents})
+
+sess.close()

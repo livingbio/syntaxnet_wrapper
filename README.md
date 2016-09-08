@@ -8,13 +8,9 @@ Please refer to [Download and Setup](https://www.tensorflow.org/versions/r0.10/g
 page in TensorFlow documents. I choose the CPU version here.
 
 ```shell-script
-# install tensorflow for python 2.7
+# SyntaxNet only support Python 2.7, install tensorflow for Python 2.7
 export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0rc0-cp27-none-linux_x86_64.whl
 pip install --upgrade $TF_BINARY_URL
-
-# install tensorflow for python 3.5
-export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0rc0-cp35-cp35m-linux_x86_64.whl
-pip3 install --upgrade $TF_BINARY_URL
 ```
 
 ### Checkout this repository
@@ -59,26 +55,24 @@ from syntaxnet_wrapper import SyntaxNetTagger, SyntaxNetParser
 
 tag = SyntaxNetTagger()  # 'English' is the default model
 print tag.query('this is a good day', returnRaw=True)
-# 1       this    _       PRON    DT      _       0       _       _       _
+# 1       this    _       DET     DT      _       0       _       _       _
 # 2       is      _       VERB    VBZ     _       0       _       _       _
 # 3       a       _       DET     DT      _       0       _       _       _
 # 4       good    _       ADJ     JJ      _       0       _       _       _
 # 5       day     _       NOUN    NN      _       0       _       _       _
 tag.query('this is a good day')  # in default, return splitted text
-# [[u'1', u'this', u'_', u'PRON', u'DT', u'_', u'0', u'_', u'_', u'_'],
-#  [u'2', u'is', u'_', u'VERB', u'VBZ', u'_', u'0', u'_', u'_', u'_'],
-#  [u'3', u'a', u'_', u'DET', u'DT', u'_', u'0', u'_', u'_', u'_'],
-#  [u'4', u'good', u'_', u'ADJ', u'JJ', u'_', u'0', u'_', u'_', u'_'],
-#  [u'5', u'day', u'_', u'NOUN', u'NN', u'_', u'0', u'_', u'_', u'_'],
 
 par = SyntaxNetParser(tagger=tag)  # use existing tagger object
 par = SyntaxNetParser()     # or create a new tagger object inside
-print par.query('this is a good day', returnRaw=True)
-# 1       this    _       PRON    DT      _       5       nsubj   _       _
-# 2       is      _       VERB    VBZ     _       5       cop     _       _
-# 3       a       _       DET     DT      _       5       det     _       _
-# 4       good    _       ADJ     JJ      _       5       amod    _       _
-# 5       day     _       NOUN    NN      _       0       ROOT    _       _
+print par.query('Alice drove down the street in her car', returnRaw=True)
+# 1       Alice   _       NOUN    NNP     _       2       nsubj   _       _
+# 2       drove   _       VERB    VBD     _       0       ROOT    _       _
+# 3       down    _       ADP     IN      _       2       prep    _       _
+# 4       the     _       DET     DT      _       5       det     _       _
+# 5       street  _       NOUN    NN      _       3       pobj    _       _
+# 6       in      _       ADP     IN      _       2       prep    _       _
+# 7       her     _       PRON    PRP$    _       8       poss    _       _
+# 8       car     _       NOUN    NN      _       6       pobj    _       _
 
 # use Chinese model
 tag = SyntaxNetTagger('Chinese')
@@ -97,3 +91,68 @@ print par.query(u'今天 天氣 很 好', returnRaw=True)
 # 4       好      _       ADJ     JJ      _       0       ROOT    _       _
 ```
 
+### Language Selection
+
+The default model is `'English-Parsey'`. This is
+[announced by Google](https://research.googleblog.com/2016/05/announcing-syntaxnet-worlds-most.html)
+on May, 2016.
+Other models, includes `'English'`, are trained by [Universal Dependencies](http://universaldependencies.org/),
+[announced by Google](https://research.googleblog.com/2016/08/meet-parseys-cousins-syntax-for-40.html)
+on August, 2016.
+
+```python
+tag.list_models()
+# ['Ancient_Greek',
+#  'Ancient_Greek-PROIEL',
+#  'Arabic',
+#  'Basque',
+#  'Bulgarian',
+#  'Catalan',
+#  'Chinese',
+#  'Croatian',
+#  'Czech',
+#  'Czech-CAC',
+#  'Czech-CLTT',
+#  'Danish',
+#  'Dutch',
+#  'Dutch-LassySmall',
+#  'English',
+#  'English-LinES',
+#  'English-Parsey',
+#  'Estonian',
+#  'Finnish',
+#  'Finnish-FTB',
+#  'French',
+#  'Galician',
+#  'German',
+#  'Gothic',
+#  'Greek',
+#  'Hebrew',
+#  'Hindi',
+#  'Hungarian',
+#  'Indonesian',
+#  'Irish',
+#  'Italian',
+#  'Kazakh',
+#  'Latin',
+#  'Latin-ITTB',
+#  'Latin-PROIEL',
+#  'Latvian',
+#  'Norwegian',
+#  'Old_Church_Slavonic',
+#  'Persian',
+#  'Polish',
+#  'Portuguese',
+#  'Portuguese-BR',
+#  'Romanian',
+#  'Russian',
+#  'Russian-SynTagRus',
+#  'Slovenian',
+#  'Slovenian-SST',
+#  'Spanish',
+#  'Spanish-AnCora',
+#  'Swedish',
+#  'Swedish-LinES',
+#  'Tamil',
+#  'Turkish']
+```
