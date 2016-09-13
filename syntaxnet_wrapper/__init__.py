@@ -148,6 +148,7 @@ language_code_to_model_name = {
     'da': 'Danish',
     'nl': 'Dutch',
     'en': 'English-Parsey',
+    'en-uni': 'English',
     'et': 'Estonian',
     'fi': 'Finnish',
     'fr': 'French',
