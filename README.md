@@ -56,15 +56,15 @@ that's cost some time.
 ```python
 from syntaxnet_wrapper import tagger, parser
 
-print tag['en'].query('this is a good day', returnRaw=True)
+print tagger['en'].query('this is a good day', returnRaw=True)
 # 1       this    _       DET     DT      _       0       _       _       _
 # 2       is      _       VERB    VBZ     _       0       _       _       _
 # 3       a       _       DET     DT      _       0       _       _       _
 # 4       good    _       ADJ     JJ      _       0       _       _       _
 # 5       day     _       NOUN    NN      _       0       _       _       _
-tag['en'].query('this is a good day')  # in default, return splitted text
+tagger['en'].query('this is a good day')  # in default, return splitted text
 
-print par['en'].query('Alice drove down the street in her car', returnRaw=True)
+print parser['en'].query('Alice drove down the street in her car', returnRaw=True)
 # 1       Alice   _       NOUN    NNP     _       2       nsubj   _       _
 # 2       drove   _       VERB    VBD     _       0       ROOT    _       _
 # 3       down    _       ADP     IN      _       2       prep    _       _
@@ -75,13 +75,13 @@ print par['en'].query('Alice drove down the street in her car', returnRaw=True)
 # 8       car     _       NOUN    NN      _       6       pobj    _       _
 
 # use Chinese model
-print tag['zh'].query(u'今天 天氣 很 好', returnRaw=True)
+print tagger['zh'].query(u'今天 天氣 很 好', returnRaw=True)
 # 1       今天    _       NOUN    NN      _       0       _       _       _
 # 2       天氣    _       NOUN    NN      _       0       _       _       _
 # 3       很      _       ADV     RB      _       0       _       _       _
 # 4       好      _       ADJ     JJ      _       0       _       _       _
 
-print par['zh'].query(u'今天 天氣 很 好', returnRaw=True)
+print parser['zh'].query(u'今天 天氣 很 好', returnRaw=True)
 # 1       今天    _       NOUN    NN      _       4       nmod:tmod       _       _
 # 2       天氣    _       NOUN    NN      _       4       nsubj   _       _
 # 3       很      _       ADV     RB      _       4       advmod  _       _
