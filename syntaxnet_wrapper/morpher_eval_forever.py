@@ -3,6 +3,7 @@ import os
 import os.path
 import sys
 import time
+import signal
 
 import tempfile
 import tensorflow as tf
@@ -64,14 +65,24 @@ sink_documents = tf.placeholder(tf.string)
 sink = gen_parser_ops.document_sink(sink_documents, task_context=task_context,
     corpus_name='stdout-conll')
 
-while True:
+
+def stdin_handler(signum, frame):
     tf_eval_epochs, tf_eval_metrics, tf_documents = sess.run([
-        morpher.evaluation['epochs'],
-        morpher.evaluation['eval_metrics'],
-        morpher.evaluation['documents'],
+        tagger.evaluation['epochs'],
+        tagger.evaluation['eval_metrics'],
+        tagger.evaluation['documents'],
     ])
 
     if len(tf_documents):
         sess.run(sink, feed_dict={sink_documents: tf_documents})
 
-sess.close()
+
+def abort_handler(signum, frame):
+    sess.close()
+    sys.exit(0)
+
+
+signal.signal(signal.SIGALRM, stdin_handler)
+signal.signal(signal.SIGABRT, abort_handler)
+while True:
+    time.sleep(1)

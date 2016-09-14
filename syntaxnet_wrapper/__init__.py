@@ -2,6 +2,8 @@ import subprocess
 import os
 import six
 import time
+import signal
+
 from shutil import copyfile
 from os.path import join, dirname, abspath, isfile
 from fcntl import fcntl, F_SETFL, F_GETFD
@@ -13,6 +15,7 @@ class SyntaxNetWrapper(object):
     def __del__(self):
         self.din.close()
         try:
+            self.process.send_signal(signal.SIGABRT)
             self.process.kill()
             self.process.wait()
         except OSError:
@@ -45,6 +48,8 @@ class SyntaxNetWrapper(object):
         fcntl(self.out.fileno(), F_SETFL, fcntl(self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
         self.isReady()  # blocked until ready
         self.isReady()  # blocked until ready
+        self.process.send_signal(signal.SIGALRM)
+        self.isReady()
 
     def isReady(self):
         '''A blocking function to wait for NiuParser program ready.
@@ -65,6 +70,7 @@ class SyntaxNetWrapper(object):
     def query(self, text, returnRaw=False):
         self.din.write(text.encode('utf8') + six.b('\n'))
         self.din.flush()
+        self.process.send_signal(signal.SIGALRM)
         results = []
         result = None
         while not result:
@@ -148,7 +154,6 @@ language_code_to_model_name = {
     'da': 'Danish',
     'nl': 'Dutch',
     'en': 'English-Parsey',
-    'en-uni': 'English',
     'et': 'Estonian',
     'fi': 'Finnish',
     'fr': 'French',
