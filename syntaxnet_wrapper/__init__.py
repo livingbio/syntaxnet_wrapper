@@ -61,7 +61,7 @@ class SyntaxNetWrapper(object):
             timeout += 1
             try:
                 result = self.out.readline().decode('utf8')[:-1]
-                # print result
+                print result
             except:
                 result = ''
             if timeout > 2000:

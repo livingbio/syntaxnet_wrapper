@@ -72,9 +72,9 @@ sink = gen_parser_ops.document_sink(sink_documents, task_context=task_context,
 
 def stdin_handler(signum, frame):
     tf_eval_epochs, tf_eval_metrics, tf_documents = sess.run([
-        tagger.evaluation['epochs'],
-        tagger.evaluation['eval_metrics'],
-        tagger.evaluation['documents'],
+        parser.evaluation['epochs'],
+        parser.evaluation['eval_metrics'],
+        parser.evaluation['documents'],
     ])
 
     if len(tf_documents):
