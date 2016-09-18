@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import os.path
-import time
 import sys
-import signal
 import signal
 
 import tempfile
@@ -92,4 +90,4 @@ def abort_handler(signum, frame):
 signal.signal(signal.SIGALRM, stdin_handler)
 signal.signal(signal.SIGABRT, abort_handler)
 while True:
-    time.sleep(1)
+    signal.pause()
