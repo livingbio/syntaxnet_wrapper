@@ -72,8 +72,14 @@ def stdin_handler(signum, frame):
         morpher.evaluation['documents'],
     ])
 
+    sys.stdout.write('\n## result start\n')
+    sys.stdout.flush()
+
     if len(tf_documents):
         sess.run(sink, feed_dict={sink_documents: tf_documents})
+
+    sys.stdout.write('\n## result end\n')
+    sys.stdout.flush()
 
 
 def abort_handler(signum, frame):
@@ -84,4 +90,6 @@ def abort_handler(signum, frame):
 signal.signal(signal.SIGALRM, stdin_handler)
 signal.signal(signal.SIGABRT, abort_handler)
 while True:
+    sys.stdout.write('\n## input content:\n')
+    sys.stdout.flush()
     signal.pause()
