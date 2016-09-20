@@ -27,6 +27,7 @@ class InstallClass(install):
             subprocess.call(['wget', '-q', model_url.format(model_name)], cwd=model_dir)
             subprocess.call(['unzip', '-n', '-qq', '{}.zip'.format(model_name)], cwd=model_dir)
             os.unlink(path.join(model_dir, '{}.zip'.format(model_name)))
+            print model_name, 'model installed.'
 
 
 setup(name='syntaxnet_wrapper',

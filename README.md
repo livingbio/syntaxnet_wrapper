@@ -2,56 +2,30 @@
 
 ## Installation
 
-### Install tensorflow
-
-Please refer to [Download and Setup](https://www.tensorflow.org/versions/r0.10/get_started/os_setup.html)
-page in TensorFlow documents. I choose the CPU version here.
-
 ```shell-script
-# SyntaxNet only support Python 2.7, install tensorflow for Python 2.7
-export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0rc0-cp27-none-linux_x86_64.whl
-pip install --upgrade $TF_BINARY_URL
+pip install git+ssh://git@github.com/livingbio/syntaxnet_wrapper.git#egg=syntaxnet_wrapper
 ```
 
-### Checkout this repository
+Download `models.tgz` (605.96 MB) may cost 10 minutes. After that, download
+models may cost 5 minutes.
 
-```shell-script
-git clone git@github.com:livingbio/syntaxnet_wrapper.git
-```
 
-### Run installation script
+## Possible Problems
 
-```shell-script
-cd syntaxnet_wrapper/syntaxnet_wrapper
-sh install.sh
-```
+The structure of directories in SyntaxNet contain many symbolic links, all of
+them point to absolute paths. To compact the prebuilt directory, we must use
+relative paths in symbolic links. Most symbolic links, point to SyntaxNet root
+directory, can be modified. But there are two kinds of symbolic links we didn't
+modify yet.
 
-If everything is installed well, you should see following outputs:
-
-```
-1       Bob     _       PROPN   NNP     Number=Sing|fPOS=PROPN++NNP     2       nsubj   _  _
-2       brought _       VERB    VBD     Mood=Ind|Tense=Past|VerbForm=Fin|fPOS=VERB++VBD 0  ROOT     _       _
-3       the     _       DET     DT      Definite=Def|PronType=Art|fPOS=DET++DT  4       det__
-4       pizza   _       NOUN    NN      Number=Sing|fPOS=NOUN++NN       2       dobj    _  _
-5       to      _       ADP     IN      fPOS=ADP++IN    6       case    _       _
-6       Alice.  _       PROPN   NNP     Number=Sing|fPOS=PROPN++NNP     2       nmod    _  _
-
-1       球      _       PROPN   NNP     fPOS=PROPN++NNP 4       nsubj   _       _
-2       從      _       ADP     IN      fPOS=ADP++IN    3       case    _       _
-3       天上    _       NOUN    NN      fPOS=NOUN++NN   4       nmod    _       _
-4       掉      _       VERB    VV      fPOS=VERB++VV   0       ROOT    _       _
-5       下來    _       VERB    VV      fPOS=VERB++VV   4       mark    _       _
-
-球 從天 上 掉 下 來
-```
+1. links to jvm root directory
+    all these links point to `/usr/lib/jvm/java-8-openjdk-amd64`.
+2. links to Python root directory
+    * Python site-packages: `/usr/local/lib/python2.7.12/lib/python2.7/site-packages`
+    * Python include path: `/usr/local/lib/python2.7.12/include`
 
 
 ## Usage
-
-Move to `syntaxnet_wrapper/` directory. You can use `ipython` to test it.
-
-NOTE: at the first time you execute `query`, the model will be initialized,
-that's cost some time.
 
 ```python
 from syntaxnet_wrapper import tagger, parser
