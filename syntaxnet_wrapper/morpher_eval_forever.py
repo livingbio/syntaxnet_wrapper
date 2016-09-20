@@ -8,19 +8,16 @@ import tempfile
 import tensorflow as tf
 
 from tensorflow.python.platform import gfile
-from tensorflow.python.platform import tf_logging as logging
 
 from google.protobuf import text_format
 
-from syntaxnet import sentence_pb2
-from syntaxnet import graph_builder
 from syntaxnet import structured_graph_builder
 from syntaxnet.ops import gen_parser_ops
 from syntaxnet import task_spec_pb2
 
 morpher_hidden_layer_sizes = '64'
 morpher_arg_prefix = 'brain_morpher'
-graph_builder = 'structured'
+# graph_builder = 'structured'
 slim_model = True
 batch_size = 1
 beam_size = 8
@@ -54,7 +51,7 @@ morpher = structured_graph_builder.StructuredGraphBuilder(
     hidden_layer_sizes, gate_gradients=True, arg_prefix=morpher_arg_prefix,
     beam_size=beam_size, max_steps=max_steps)
 morpher.AddEvaluation(task_context, batch_size, corpus_name='stdin',
-    evaluation_max_steps=max_steps)
+                      evaluation_max_steps=max_steps)
 
 morpher.AddSaver(slim_model)
 sess.run(morpher.inits.values())
@@ -62,7 +59,7 @@ morpher.saver.restore(sess, morpher_model_path)
 
 sink_documents = tf.placeholder(tf.string)
 sink = gen_parser_ops.document_sink(sink_documents, task_context=task_context,
-    corpus_name='stdout-conll')
+                                    corpus_name='stdout-conll')
 
 
 def stdin_handler(signum, frame):
