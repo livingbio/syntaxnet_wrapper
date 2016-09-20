@@ -92,7 +92,7 @@ class SyntaxNetWrapper(object):
                 pass
 
         if returnRaw:
-            return '\n'.join(results).strip()
+            return '\n'.join(results).strip() + "\n"
         return [r.split('\t') for r in results[:-1]]
 
     def list_models(self):
