@@ -35,19 +35,22 @@ class SyntaxNetWrapper(object):
         context_path = join(pwd, context_path)
         command = ['python', run_filename, model_path, context_path]
 
-        copyfile(join(pwd, run_filename), join(rundir, run_filename))
+        # copyfile(join(pwd, run_filename), join(rundir, run_filename))
 
-        print command, rundir
+        print '$ cd ', pwd
+        print '$ export PYTHONPATH=', rundir
+        print '$', ' '.join(command)
         env = os.environ.copy()
+        env['PYTHONPATH'] = rundir
         subproc_args = {'stdin': subprocess.PIPE, 'stdout': subprocess.PIPE,
-                        'stderr': subprocess.STDOUT, 'cwd': rundir,
+                        'stderr': subprocess.STDOUT, 'cwd': pwd,
                         'env': env, 'close_fds': True}
         self.process = subprocess.Popen(command, shell=False, **subproc_args)
         self.out = self.process.stdout
         self.din = self.process.stdin
         fcntl(self.out.fileno(), F_SETFL, fcntl(self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
 
-    def isReady(self):
+    def _is_ready(self):
         '''A blocking function to wait for NiuParser program ready.
         '''
         timeout = 0
@@ -67,14 +70,14 @@ class SyntaxNetWrapper(object):
 
 
     def query(self, text, returnRaw=False):
-        self.isReady()  # blocked until ready
+        self._is_ready()  # blocked until ready
         self.din.write(text.encode('utf8') + six.b('\n'))
         self.din.flush()
         self.process.send_signal(signal.SIGALRM)
         results = []
         result = None
         start = 0
-        timeout = 0 
+        timeout = 0
         while True:
             try:
                 result = self.out.readline().decode('utf8')[:-1]
@@ -93,7 +96,7 @@ class SyntaxNetWrapper(object):
 
         if returnRaw:
             return '\n'.join(results).strip() + "\n"
-        return [r.split('\t') for r in results[:-1]]
+        return [r.split('\t') for r in results[:-2]]
 
     def list_models(self):
         pwd = dirname(abspath(__file__))
