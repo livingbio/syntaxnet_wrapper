@@ -5,7 +5,7 @@ import time
 import signal
 
 from shutil import copyfile
-from os.path import join, dirname, abspath, isfile
+from os.path import join, dirname, abspath
 from fcntl import fcntl, F_SETFL, F_GETFD
 
 __all__ = ['parser', 'tagger']
