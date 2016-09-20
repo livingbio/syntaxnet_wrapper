@@ -11,6 +11,8 @@ rm bazel-0.2.2b-installer-linux-x86_64.sh
 #
 # SyntaxNet original version (installed as a normal user)
 #
+export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0rc0-cp27-none-linux_x86_64.whl
+sudo pip install --upgrade $TF_BINARY_URL
 sudo apt-get -y install swig unzip
 sudo pip install -U protobuf==3.0.0b2
 sudo pip install asciitree

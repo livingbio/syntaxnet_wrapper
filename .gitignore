@@ -1,2 +1,4 @@
 *.pyc
 syntaxnet_wrapper/models/
+build
+syntaxnet_wrapper.egg-info
