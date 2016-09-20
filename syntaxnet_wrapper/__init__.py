@@ -46,46 +46,53 @@ class SyntaxNetWrapper(object):
         self.out = self.process.stdout
         self.din = self.process.stdin
         fcntl(self.out.fileno(), F_SETFL, fcntl(self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
-        self.isReady()  # blocked until ready
-        self.isReady()  # blocked until ready
-        self.process.send_signal(signal.SIGALRM)
-        self.isReady()
 
     def isReady(self):
         '''A blocking function to wait for NiuParser program ready.
         '''
-        result = ''
         timeout = 0
-        while not result.endswith(u'/word-map.'):
-            time.sleep(0.001)
-            timeout += 1
+        print 'check module is ready'
+        while True:
             try:
-                result = self.out.readline().decode('utf8')[:-1]
+                result = self.out.readline().decode('utf-8').strip()
                 print result
-            except:
-                result = ''
-            if timeout > 2000:
-                break
+                if result == '## input content:':
+                    print 'ready'
+                    return True
+            except Exception as e:
+                time.sleep(0.1)
+                timeout += 1
+                if timeout > 100:
+                    raise Exception('error')
+
 
     def query(self, text, returnRaw=False):
+        self.isReady()  # blocked until ready
         self.din.write(text.encode('utf8') + six.b('\n'))
         self.din.flush()
         self.process.send_signal(signal.SIGALRM)
         results = []
         result = None
-        while not result:
+        start = 0
+        timeout = 0 
+        while True:
             try:
                 result = self.out.readline().decode('utf8')[:-1]
+
+                if result == '## result end':
+                    break
+
+                if start:
+                    results.append(result)
+
+                if result == '## result start':
+                    start = 1
             except:
-                result = None
-        results.append(result)
-        try:
-            while True:
-                results.append(self.out.readline().decode('utf8')[:-1])
-        except:
-            pass
+                time.sleep(0.1)
+                pass
+
         if returnRaw:
-            return '\n'.join(results)
+            return '\n'.join(results).strip()
         return [r.split('\t') for r in results[:-1]]
 
     def list_models(self):
