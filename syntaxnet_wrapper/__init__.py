@@ -186,6 +186,12 @@ language_code_to_model_name = {
 class Tagger(object):
     cached = {}
 
+    def __del__(self):
+        for code in self.cached:
+            tmp = self.cached[code]
+            self.cached[code] = None
+            del tmp
+
     def __getitem__(self, code):
         if code not in language_code_to_model_name:
             raise ValueError('Invalid language code for tagger: {}'.format(code))
@@ -200,6 +206,12 @@ tagger = Tagger()
 
 class Parser(object):
     cached = {}
+
+    def __del__(self):
+        for code in self.cached:
+            tmp = self.cached[code]
+            self.cached[code] = None
+            del tmp
 
     def __getitem__(self, code):
         if code not in language_code_to_model_name:
