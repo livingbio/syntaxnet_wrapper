@@ -1,5 +1,7 @@
 #!/bin/sh
 
+if [ "$EUID" -eq 0 ]
+then
 # install open-jdk 8
 add-apt-repository -y ppa:openjdk-r/ppa
 apt-get -y update
@@ -13,6 +15,8 @@ pip install --upgrade $TF_BINARY_URL
 sudo apt-get -y install swig unzip
 pip install -U protobuf==3.0.0b2
 pip install asciitree
+
+fi
 
 tar xvfz models.tgz
 cp *.py models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles/
