@@ -5,6 +5,7 @@ import subprocess
 from os import path
 import os
 import pip
+import stat
 
 model_list = ['Arabic', 'Basque', 'Bulgarian', 'Catalan', 'Chinese', 'Croatian',
     'Czech', 'Danish', 'Dutch', 'English', 'Estonian', 'Finnish', 'French',
@@ -27,6 +28,11 @@ class InstallClass(install):
             subprocess.call(['wget', '-q', model_url.format(model_name)], cwd=model_dir)
             subprocess.call(['unzip', '-n', '-qq', '{}.zip'.format(model_name)], cwd=model_dir)
             os.unlink(path.join(model_dir, '{}.zip'.format(model_name)))
+            dir_name = path.join(model_dir, model_name)
+            os.chmod(dir_name, os.stat(dir_name).st_mode | stat.S_IROTH | stat.S_IXOTH)
+            for fn in os.listdir(dir_name):
+                fpath = path.join(dir_name, fn)
+                os.chmod(fpath, os.stat(fpath).st_mode | stat.S_IROTH)
             print model_name, 'model installed.'
 
 
