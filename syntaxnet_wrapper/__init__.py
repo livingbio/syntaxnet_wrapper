@@ -4,7 +4,6 @@ import six
 import time
 import signal
 
-from shutil import copyfile
 from os.path import join, dirname, abspath
 from fcntl import fcntl, F_SETFL, F_GETFD
 
@@ -62,12 +61,11 @@ class SyntaxNetWrapper(object):
                 if result == '## input content:':
                     print 'ready'
                     return True
-            except Exception as e:
+            except Exception:
                 time.sleep(0.1)
                 timeout += 1
                 if timeout > 100:
                     raise Exception('error')
-
 
     def query(self, text, returnRaw=False):
         self._is_ready()  # blocked until ready
@@ -81,15 +79,16 @@ class SyntaxNetWrapper(object):
         while True:
             try:
                 result = self.out.readline().decode('utf8')[:-1]
-
                 if result == '## result end':
                     break
-
                 if start:
                     results.append(result)
-
                 if result == '## result start':
                     start = 1
+                if timeout > 30:
+                    break
+                else:
+                    timeout += 1
             except:
                 time.sleep(0.1)
                 pass
@@ -127,8 +126,11 @@ class SyntaxNetTagger(SyntaxNetWrapper):
 
     def query(self, text, returnRaw=False):
         if self.morpher:
-            text = self.morpher.query(text, returnRaw=True)
-        return super(SyntaxNetTagger, self).query(text, returnRaw)
+            conll_text = self.morpher.query(text, returnRaw=True)
+        return super(SyntaxNetTagger, self).query(conll_text, returnRaw)
+
+    def query_raw(self, conll_text, returnRaw=False):
+        return super(SyntaxNetTagger, self).query(conll_text, returnRaw)
 
 
 class SyntaxNetParser(SyntaxNetWrapper):
@@ -147,8 +149,11 @@ class SyntaxNetParser(SyntaxNetWrapper):
         super(SyntaxNetParser, self).__init__('parser_eval_forever.py', model_name)
 
     def query(self, text, returnRaw=False):
-        text = self.tagger.query(text, returnRaw=True)
-        return super(SyntaxNetParser, self).query(text, returnRaw)
+        conll_text = self.tagger.query(text, returnRaw=True)
+        return super(SyntaxNetParser, self).query(conll_text, returnRaw)
+
+    def query_raw(self, conll_text, returnRaw=False):
+        return super(SyntaxNetTagger, self).query(conll_text, returnRaw)
 
 
 language_code_to_model_name = {

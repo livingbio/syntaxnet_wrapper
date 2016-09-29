@@ -75,7 +75,6 @@ def stdin_handler(signum, frame):
         tagger.evaluation['documents'],
     ])
 
-
     sys.stdout.write('\n## result start\n')
     sys.stdout.flush()
 
