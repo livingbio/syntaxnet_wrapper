@@ -2,12 +2,31 @@
 
 ## Installation
 
+#### Prerequisites
+
+Install `bazel 0.2.2b`.
+
+```shell-script
+wget https://github.com/bazelbuild/bazel/releases/download/0.2.2b/bazel-0.2.2b-installer-linux-x86_64.sh
+chmod +x bazel-0.2.2b-installer-linux-x86_64.sh
+./bazel-0.2.2b-installer-linux-x86_64.sh --user
+rm bazel-0.2.2b-installer-linux-x86_64.sh
+```
+
+Install OpenJDK8.
+
+```shell-script
+add-apt-repository -y ppa:openjdk-r/ppa
+apt-get -y update
+apt-get -y install openjdk-8-jdk
+```
+
+
+#### Start Installing
+
 ```shell-script
 pip install git+ssh://git@github.com/livingbio/syntaxnet_wrapper.git#egg=syntaxnet_wrapper
 ```
-
-Download `models.tgz` (605.96 MB) may cost 10 minutes. After that, download
-models may cost 5 minutes.
 
 
 ## Possible Problems
