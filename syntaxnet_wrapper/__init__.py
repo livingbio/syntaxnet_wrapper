@@ -119,9 +119,9 @@ class SyntaxNetTagger(SyntaxNetWrapper):
             self.morpher = SyntaxNetMorpher(model_name)
         super(SyntaxNetTagger, self).__init__('tagger_eval_forever.py', model_name)
 
-    def query(self, text, returnRaw=False):
+    def query(self, conll_text, returnRaw=False):
         if self.morpher:
-            conll_text = self.morpher.query(text, returnRaw=True)
+            conll_text = self.morpher.query(conll_text, returnRaw=True)
         return super(SyntaxNetTagger, self).query(conll_text, returnRaw)
 
     def query_raw(self, conll_text, returnRaw=False):
