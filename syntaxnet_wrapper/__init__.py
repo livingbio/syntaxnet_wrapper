@@ -153,7 +153,7 @@ class SyntaxNetParser(SyntaxNetWrapper):
         return super(SyntaxNetParser, self).query(conll_text, returnRaw)
 
     def query_raw(self, conll_text, returnRaw=False):
-        return super(SyntaxNetTagger, self).query(conll_text, returnRaw)
+        return super(SyntaxNetParser, self).query(conll_text, returnRaw)
 
 
 language_code_to_model_name = {
