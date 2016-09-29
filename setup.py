@@ -27,7 +27,7 @@ class InstallClass(install):
 
 
 setup(name='syntaxnet_wrapper',
-      version='0.2.1',
+      version='0.3.0',
       description='A Python Wrapper for Google SyntaxNet',
       url='https://github.com/livingbio/syntaxnet_wrapper',
       author='Ping Chu Hung',

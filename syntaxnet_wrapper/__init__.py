@@ -25,6 +25,9 @@ class SyntaxNetWrapper(object):
         if model_name == 'English-Parsey':
             model_path = 'models/syntaxnet'
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_mcparseface/context.pbtxt'
+        elif model_name == 'ZHTokenizer':
+            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/Chinese'
+            context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context-tokenize-zh.pbtxt'
         else:
             model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(model_name)
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context.pbtxt'
@@ -104,9 +107,29 @@ class SyntaxNetWrapper(object):
         return sorted(models)
 
 
+class SyntaxNetTokenizer(SyntaxNetWrapper):
+    def __init__(self, model_name='ZHTokenizer'):
+        super(SyntaxNetTokenizer, self).__init__('tokenizer_eval_forever.py', model_name)
+
+    def query(self, text):
+        return super(SyntaxNetTokenizer, self).query(text, returnRaw=True)
+
+
 class SyntaxNetMorpher(SyntaxNetWrapper):
     def __init__(self, model_name='English'):
+        if model_name == 'Chinese':
+            self.tokenizer = SyntaxNetTokenizer()
         super(SyntaxNetMorpher, self).__init__('morpher_eval_forever.py', model_name)
+
+    def query(self, text, returnRaw=False):
+        if self.tokenizer:
+            tokenized_text = self.tokenizer.query(text)
+        else:
+            tokenized_text = text
+        return super(SyntaxNetMorpher, self).query(tokenized_text, returnRaw)
+
+    def query_raw(self, tokenized_text, returnRaw=False):
+        return super(SyntaxNetMorpher, self).query(tokenized_text, returnRaw)
 
 
 class SyntaxNetTagger(SyntaxNetWrapper):
@@ -119,10 +142,12 @@ class SyntaxNetTagger(SyntaxNetWrapper):
             self.morpher = SyntaxNetMorpher(model_name)
         super(SyntaxNetTagger, self).__init__('tagger_eval_forever.py', model_name)
 
-    def query(self, text, returnRaw=False):
+    def query(self, morphed_text, returnRaw=False):
         if self.morpher:
-            text = self.morpher.query(text, returnRaw=True)
-        return super(SyntaxNetTagger, self).query(text, returnRaw)
+            conll_text = self.morpher.query(morphed_text, returnRaw=True)
+        else:
+            conll_text = morphed_text
+        return super(SyntaxNetTagger, self).query(conll_text, returnRaw)
 
     def query_raw(self, conll_text, returnRaw=False):
         return super(SyntaxNetTagger, self).query(conll_text, returnRaw)
