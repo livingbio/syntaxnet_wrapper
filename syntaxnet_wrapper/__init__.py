@@ -36,9 +36,9 @@ class SyntaxNetWrapper(object):
 
         # copyfile(join(pwd, run_filename), join(rundir, run_filename))
 
-        print '$ cd ', pwd
-        print '$ export PYTHONPATH=', rundir
-        print '$', ' '.join(command)
+        # print '$ cd ', pwd
+        # print '$ export PYTHONPATH=', rundir
+        # print '$', ' '.join(command)
         env = os.environ.copy()
         env['PYTHONPATH'] = rundir
         subproc_args = {'stdin': subprocess.PIPE, 'stdout': subprocess.PIPE,
@@ -75,7 +75,6 @@ class SyntaxNetWrapper(object):
         results = []
         result = None
         start = 0
-        timeout = 0
         while True:
             try:
                 result = self.out.readline().decode('utf8')[:-1]
@@ -85,10 +84,6 @@ class SyntaxNetWrapper(object):
                     results.append(result)
                 if result == '## result start':
                     start = 1
-                if timeout > 30:
-                    break
-                else:
-                    timeout += 1
             except:
                 time.sleep(0.1)
                 pass
