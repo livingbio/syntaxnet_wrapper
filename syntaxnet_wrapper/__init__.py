@@ -258,3 +258,25 @@ class Parser(object):
         return self.cached[code]
 
 parser = Parser()
+
+
+def parse_text(text, lang='en', returnRaw=True):
+    lang = language_code_to_model_name[lang]
+    tagger, parser = None, None
+    try:
+        tagger = SyntaxNetTagger(lang)
+        parser = SyntaxNetParser(lang, tagger=tagger)
+        result = parser.query(text, returnRaw)
+        return result
+    finally:
+        del tagger, parser
+
+def tag_text(text, lang='en', returnRaw=True):
+    lang = language_code_to_model_name[lang]
+    tagger = None
+    try:
+        tagger = SyntaxNetTagger(lang)
+        result = tagger.query(text, returnRaw)
+        return result
+    finally:
+        del tagger
