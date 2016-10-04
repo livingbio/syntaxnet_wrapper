@@ -51,7 +51,7 @@ class InstallTarClass(install):
             print model_name, 'model is installed.'
 
 setup(name='syntaxnet_wrapper',
-      version='0.3.1',
+      version='0.3.2',
       description='A Python Wrapper for Google SyntaxNet',
       url='https://github.com/livingbio/syntaxnet_wrapper',
       author='Ping Chu Hung',

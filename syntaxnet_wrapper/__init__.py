@@ -119,6 +119,8 @@ class SyntaxNetMorpher(SyntaxNetWrapper):
     def __init__(self, model_name='English'):
         if model_name == 'Chinese':
             self.tokenizer = SyntaxNetTokenizer()
+        else:
+            self.tokenizer = None
         super(SyntaxNetMorpher, self).__init__('morpher_eval_forever.py', model_name)
 
     def query(self, text, returnRaw=False):
