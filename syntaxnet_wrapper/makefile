@@ -54,9 +54,12 @@ all: models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek-PROIEL \
 
 models: 
 	git clone --recursive https://github.com/tensorflow/models.git && \
+	cd models && \
 	git checkout f98c5ded31d7da0c2d127c28b2c16f0307a368f0 && \
+	git submodule update && \
 	cd models/syntaxnet/tensorflow && \
-    	./configure < /dev/null 
+	git clean -fd && \
+	./configure < /dev/null 
 
 models/syntaxnet/bazel_root: models
 	cd models/syntaxnet && \
