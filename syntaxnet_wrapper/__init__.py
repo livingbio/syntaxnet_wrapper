@@ -58,7 +58,7 @@ class SyntaxNetWrapper(object):
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context.pbtxt'
 
         context_path = join(pwd, context_path)
-        model_path = join(pwd, self.model_path)
+        model_path = join(pwd, model_path)
 
         self.model_path = model_path
         self.context_path = context_path
@@ -69,8 +69,8 @@ class SyntaxNetWrapper(object):
         result = []
         while True:
             try:
-                line = self.out.readline().decode('utf-8').strip()[:-1]
-                if text == result:
+                line = self.out.readline().decode('utf-8').strip()
+                if text == line:
                     return result
                 result.append(line)
             except:
@@ -82,6 +82,7 @@ class SyntaxNetWrapper(object):
         # push data
         self.din.write(text.encode('utf8') + six.b('\n'))
         self.din.flush()
+        self.process.send_signal(signal.SIGALRM)
 
         self.wait_for('## result start')
         results = self.wait_for('## result end')
