@@ -5,10 +5,14 @@ import signal
 
 from os.path import join, dirname, abspath
 from fcntl import fcntl, F_SETFL, F_GETFD
+import time
 
 __all__ = ['parser', 'tagger']
 pwd = dirname(abspath(__file__))
 
+
+class TimeoutException(Exception):
+    pass
 
 class SyntaxNetWrapper(object):
 
@@ -65,8 +69,13 @@ class SyntaxNetWrapper(object):
 
         self.start()
 
-    def wait_for(self, text):
+    def restart(self):
+        self.stop()
+        self.start()
+
+    def wait_for(self, text, timeout=5):
         result = []
+        start_time = datetime.now()
         while True:
             try:
                 line = self.out.readline().decode('utf-8').strip()
@@ -74,9 +83,14 @@ class SyntaxNetWrapper(object):
                     return result
                 result.append(line)
             except:
-                pass
+                # read timeout
+                time.sleep(0.1)
+            finally:
+                now = datetime.now()
+                if(now - start_time) > timedelta(timeout):
+                    raise TimeoutException()
 
-    def query(self, text, returnRaw=False):
+    def __query(self, text, returnRaw=False):
         self.wait_for('## input content:')
 
         # push data
@@ -90,6 +104,15 @@ class SyntaxNetWrapper(object):
         if returnRaw:
             return '\n'.join(results).strip() + "\n"
         return [r.split('\t') for r in results[:-2]]
+
+    def query(self,text, returnRaw=False):
+        for i in xrange(3):
+            try:
+                return self.__query(text, returnRaw)
+            except:
+                # retart process
+                self.restart()
+
 
     def list_models(self):
         pwd = dirname(abspath(__file__))
