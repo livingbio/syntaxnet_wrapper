@@ -1,17 +1,43 @@
 import subprocess
 import os
 import six
-import time
 import signal
 
 from os.path import join, dirname, abspath
 from fcntl import fcntl, F_SETFL, F_GETFD
+import time
+from datetime import datetime, timedelta
 
 __all__ = ['parser', 'tagger']
+pwd = dirname(abspath(__file__))
 
+
+class TimeoutException(Exception):
+    pass
 
 class SyntaxNetWrapper(object):
+
     def __del__(self):
+        self.stop()
+
+    def start(self):
+        rundir = join(
+            pwd, 'models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles')
+        command = ['python', self.run_filename,
+                   self.model_path, self.context_path]
+
+        env = os.environ.copy()
+        env['PYTHONPATH'] = rundir
+        subproc_args = {'stdin': subprocess.PIPE, 'stdout': subprocess.PIPE,
+                        'stderr': subprocess.STDOUT, 'cwd': pwd,
+                        'env': env, 'close_fds': True}
+        self.process = subprocess.Popen(command, shell=False, **subproc_args)
+        self.out = self.process.stdout
+        self.din = self.process.stdin
+        fcntl(self.out.fileno(), F_SETFL, fcntl(
+            self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
+
+    def stop(self):
         self.din.close()
         try:
             self.process.send_signal(signal.SIGABRT)
@@ -21,7 +47,10 @@ class SyntaxNetWrapper(object):
             pass
 
     def __init__(self, run_filename, model_name):
+
         self.model_name = model_name
+        self.run_filename = run_filename
+
         if model_name == 'English-Parsey':
             model_path = 'models/syntaxnet'
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_mcparseface/context.pbtxt'
@@ -29,75 +58,67 @@ class SyntaxNetWrapper(object):
             model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/Chinese'
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context-tokenize-zh.pbtxt'
         else:
-            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(model_name)
+            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(
+                model_name)
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context.pbtxt'
-        pwd = dirname(abspath(__file__))
-        model_path = join(pwd, model_path)
-        rundir = join(pwd, 'models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles')
+
         context_path = join(pwd, context_path)
-        command = ['python', run_filename, model_path, context_path]
+        model_path = join(pwd, model_path)
 
-        # copyfile(join(pwd, run_filename), join(rundir, run_filename))
+        self.model_path = model_path
+        self.context_path = context_path
 
-        # print '$ cd ', pwd
-        # print '$ export PYTHONPATH=', rundir
-        # print '$', ' '.join(command)
-        env = os.environ.copy()
-        env['PYTHONPATH'] = rundir
-        subproc_args = {'stdin': subprocess.PIPE, 'stdout': subprocess.PIPE,
-                        'stderr': subprocess.STDOUT, 'cwd': pwd,
-                        'env': env, 'close_fds': True}
-        self.process = subprocess.Popen(command, shell=False, **subproc_args)
-        self.out = self.process.stdout
-        self.din = self.process.stdin
-        fcntl(self.out.fileno(), F_SETFL, fcntl(self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
+        self.start()
 
-    def _is_ready(self):
-        '''A blocking function to wait for NiuParser program ready.
-        '''
-        timeout = 0
-        print 'check module is ready'
+    def restart(self):
+        self.stop()
+        self.start()
+
+    def wait_for(self, text, timeout=5):
+        result = []
+        start_time = datetime.now()
         while True:
             try:
-                result = self.out.readline().decode('utf-8').strip()
-                print result
-                if result == '## input content:':
-                    print 'ready'
-                    return True
-            except Exception:
+                line = self.out.readline().decode('utf-8').strip()
+                if text == line:
+                    return result
+                result.append(line)
+            except:
+                # read timeout
                 time.sleep(0.1)
-                timeout += 1
-                if timeout > 100:
-                    raise Exception('error')
+            finally:
+                now = datetime.now()
+                if(now - start_time) > timedelta(0, timeout):
+                    raise TimeoutException()
 
-    def query(self, text, returnRaw=False):
-        self._is_ready()  # blocked until ready
+    def __query(self, text, returnRaw=False):
+        self.wait_for('## input content:')
+
+        # push data
         self.din.write(text.encode('utf8') + six.b('\n'))
         self.din.flush()
         self.process.send_signal(signal.SIGALRM)
-        results = []
-        result = None
-        start = 0
-        while True:
-            try:
-                result = self.out.readline().decode('utf8')[:-1]
-                if result == '## result end':
-                    break
-                if start:
-                    results.append(result)
-                if result == '## result start':
-                    start = 1
-            except:
-                time.sleep(0.1)
-                pass
+
+        self.wait_for('## result start')
+        results = self.wait_for('## result end')
 
         if returnRaw:
             return '\n'.join(results).strip() + "\n"
         return [r.split('\t') for r in results[:-2]]
 
+    def query(self,text, returnRaw=False):
+        for i in xrange(3):
+            try:
+                return self.__query(text, returnRaw)
+            except Exception as e:
+                # retart process
+                self.restart()
+
+
     def list_models(self):
         pwd = dirname(abspath(__file__))
-        model_path = os.path.join(pwd, 'models/syntaxnet/syntaxnet/models/parsey_universal')
+        model_path = os.path.join(
+            pwd, 'models/syntaxnet/syntaxnet/models/parsey_universal')
         files = os.listdir(model_path)
         models = []
         for fn in files:
@@ -108,20 +129,24 @@ class SyntaxNetWrapper(object):
 
 
 class SyntaxNetTokenizer(SyntaxNetWrapper):
+
     def __init__(self, model_name='ZHTokenizer'):
-        super(SyntaxNetTokenizer, self).__init__('tokenizer_eval_forever.py', model_name)
+        super(SyntaxNetTokenizer, self).__init__(
+            'tokenizer_eval_forever.py', model_name)
 
     def query(self, text):
         return super(SyntaxNetTokenizer, self).query(text, returnRaw=True)
 
 
 class SyntaxNetMorpher(SyntaxNetWrapper):
+
     def __init__(self, model_name='English'):
         if model_name == 'Chinese':
             self.tokenizer = SyntaxNetTokenizer()
         else:
             self.tokenizer = None
-        super(SyntaxNetMorpher, self).__init__('morpher_eval_forever.py', model_name)
+        super(SyntaxNetMorpher, self).__init__(
+            'morpher_eval_forever.py', model_name)
 
     def query(self, text, returnRaw=False):
         if self.tokenizer:
@@ -135,6 +160,7 @@ class SyntaxNetMorpher(SyntaxNetWrapper):
 
 
 class SyntaxNetTagger(SyntaxNetWrapper):
+
     def __init__(self, model_name='English-Parsey', **kwargs):
         if model_name == 'English-Parsey':
             self.morpher = None
@@ -142,7 +168,8 @@ class SyntaxNetTagger(SyntaxNetWrapper):
             self.morpher = kwargs['morpher']
         else:
             self.morpher = SyntaxNetMorpher(model_name)
-        super(SyntaxNetTagger, self).__init__('tagger_eval_forever.py', model_name)
+        super(SyntaxNetTagger, self).__init__(
+            'tagger_eval_forever.py', model_name)
 
     def query(self, morphed_text, returnRaw=False):
         if self.morpher:
@@ -156,6 +183,7 @@ class SyntaxNetTagger(SyntaxNetWrapper):
 
 
 class SyntaxNetParser(SyntaxNetWrapper):
+
     def __init__(self, model_name='English-Parsey', **kwargs):
         if 'tagger' in kwargs:
             self.tagger = kwargs['tagger']
@@ -168,7 +196,8 @@ class SyntaxNetParser(SyntaxNetWrapper):
             else:
                 self.morpher = SyntaxNetMorpher(model_name)
             self.tagger = SyntaxNetTagger(model_name, morpher=self.morpher)
-        super(SyntaxNetParser, self).__init__('parser_eval_forever.py', model_name)
+        super(SyntaxNetParser, self).__init__(
+            'parser_eval_forever.py', model_name)
 
     def query(self, text, returnRaw=False):
         conll_text = self.tagger.query(text, returnRaw=True)
@@ -231,7 +260,8 @@ class Tagger(object):
 
     def __getitem__(self, code):
         if code not in language_code_to_model_name:
-            raise ValueError('Invalid language code for tagger: {}'.format(code))
+            raise ValueError(
+                'Invalid language code for tagger: {}'.format(code))
         lang = language_code_to_model_name[code]
         if code in self.cached:
             return self.cached[code]
@@ -252,7 +282,8 @@ class Parser(object):
 
     def __getitem__(self, code):
         if code not in language_code_to_model_name:
-            raise ValueError('Invalid language code for parser: {}'.format(code))
+            raise ValueError(
+                'Invalid language code for parser: {}'.format(code))
         lang = language_code_to_model_name[code]
         if code in self.cached:
             return self.cached[code]
@@ -272,6 +303,7 @@ def parse_text(text, lang='en', returnRaw=True):
         return result
     finally:
         del tagger, parser
+
 
 def tag_text(text, lang='en', returnRaw=True):
     lang = language_code_to_model_name[lang]
