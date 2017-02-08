@@ -52,18 +52,14 @@ all: models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek-PROIEL \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Tamil \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Turkish
 
-models: 
+models:
 	git clone --recursive https://github.com/tensorflow/models.git && \
-	cd models && \
-	git checkout f98c5ded31d7da0c2d127c28b2c16f0307a368f0 && \
-	git submodule update && \
-	cd syntaxnet/tensorflow && \
-	git clean -fd && \
-	./configure < /dev/null 
+	cd models/syntaxnet/tensorflow && \
+	printf '/usr/local/lib/python2.7.12/bin/python\n\n\n\n\n\n' | ./configure
 
 models/syntaxnet/bazel_root: models
 	cd models/syntaxnet && \
-    	~/bin/bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
+	~/bin/bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
 	rm -rf bazel_root
 
 models/syntaxnet/parse.sh: models
@@ -77,8 +73,6 @@ models/syntaxnet/tokenize_zh.sh: models
 
 models/syntaxnet/syntaxnet/models/parsey_universal/%: models/syntaxnet/bazel_root models/syntaxnet/parse.sh models/syntaxnet/tokenize.sh models/syntaxnet/tokenize_zh.sh
 	cd models/syntaxnet/syntaxnet/models/parsey_universal/ && \
-    	wget http://download.tensorflow.org/models/parsey_universal/$*.zip && \
-    	unzip $*.zip && \
-    	rm $*.zip
-
-
+	wget http://download.tensorflow.org/models/parsey_universal/$*.zip && \
+	unzip $*.zip && \
+	rm $*.zip

@@ -21,10 +21,8 @@ class SyntaxNetWrapper(object):
         self.stop()
 
     def start(self):
-        rundir = join(
-            pwd, 'models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles')
-        command = ['python', self.run_filename,
-                   self.model_path, self.context_path]
+        rundir = join(pwd, 'models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles/__main__')
+        command = ['python', self.run_filename, self.model_path, self.context_path]
 
         env = os.environ.copy()
         env['PYTHONPATH'] = rundir
@@ -34,8 +32,7 @@ class SyntaxNetWrapper(object):
         self.process = subprocess.Popen(command, shell=False, **subproc_args)
         self.out = self.process.stdout
         self.din = self.process.stdin
-        fcntl(self.out.fileno(), F_SETFL, fcntl(
-            self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
+        fcntl(self.out.fileno(), F_SETFL, fcntl(self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
 
     def stop(self):
         self.din.close()
@@ -58,8 +55,7 @@ class SyntaxNetWrapper(object):
             model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/Chinese'
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context-tokenize-zh.pbtxt'
         else:
-            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(
-                model_name)
+            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(model_name)
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context.pbtxt'
 
         context_path = join(pwd, context_path)
@@ -117,8 +113,7 @@ class SyntaxNetWrapper(object):
 
     def list_models(self):
         pwd = dirname(abspath(__file__))
-        model_path = os.path.join(
-            pwd, 'models/syntaxnet/syntaxnet/models/parsey_universal')
+        model_path = os.path.join(pwd, 'models/syntaxnet/syntaxnet/models/parsey_universal')
         files = os.listdir(model_path)
         models = []
         for fn in files:
@@ -131,8 +126,7 @@ class SyntaxNetWrapper(object):
 class SyntaxNetTokenizer(SyntaxNetWrapper):
 
     def __init__(self, model_name='ZHTokenizer'):
-        super(SyntaxNetTokenizer, self).__init__(
-            'tokenizer_eval_forever.py', model_name)
+        super(SyntaxNetTokenizer, self).__init__('tokenizer_eval_forever.py', model_name)
 
     def query(self, text):
         return super(SyntaxNetTokenizer, self).query(text, returnRaw=True)
@@ -145,8 +139,7 @@ class SyntaxNetMorpher(SyntaxNetWrapper):
             self.tokenizer = SyntaxNetTokenizer()
         else:
             self.tokenizer = None
-        super(SyntaxNetMorpher, self).__init__(
-            'morpher_eval_forever.py', model_name)
+        super(SyntaxNetMorpher, self).__init__('morpher_eval_forever.py', model_name)
 
     def query(self, text, returnRaw=False):
         if self.tokenizer:
@@ -168,8 +161,7 @@ class SyntaxNetTagger(SyntaxNetWrapper):
             self.morpher = kwargs['morpher']
         else:
             self.morpher = SyntaxNetMorpher(model_name)
-        super(SyntaxNetTagger, self).__init__(
-            'tagger_eval_forever.py', model_name)
+        super(SyntaxNetTagger, self).__init__('tagger_eval_forever.py', model_name)
 
     def query(self, morphed_text, returnRaw=False):
         if self.morpher:
@@ -196,8 +188,7 @@ class SyntaxNetParser(SyntaxNetWrapper):
             else:
                 self.morpher = SyntaxNetMorpher(model_name)
             self.tagger = SyntaxNetTagger(model_name, morpher=self.morpher)
-        super(SyntaxNetParser, self).__init__(
-            'parser_eval_forever.py', model_name)
+        super(SyntaxNetParser, self).__init__('parser_eval_forever.py', model_name)
 
     def query(self, text, returnRaw=False):
         conll_text = self.tagger.query(text, returnRaw=True)

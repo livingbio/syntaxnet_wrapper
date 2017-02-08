@@ -4,13 +4,14 @@
 
 #### Prerequisites
 
-Install `bazel 0.2.2b`.
+Install `bazel` and include `bazel` in `$PATH`.
 
 ```shell-script
-wget https://github.com/bazelbuild/bazel/releases/download/0.2.2b/bazel-0.2.2b-installer-linux-x86_64.sh
-chmod +x bazel-0.2.2b-installer-linux-x86_64.sh
-./bazel-0.2.2b-installer-linux-x86_64.sh --user
-rm bazel-0.2.2b-installer-linux-x86_64.sh
+wget https://github.com/bazelbuild/bazel/releases/download/0.4.4/bazel-0.4.4-installer-linux-x86_64.sh
+chmod +x bazel-0.4.4-installer-linux-x86_64.sh
+./bazel-0.4.4-installer-linux-x86_64.sh --user
+rm bazel-0.4.4-installer-linux-x86_64.sh
+export PATH="$PATH:$HOME/bin"
 ```
 
 Install OpenJDK8.
@@ -19,6 +20,18 @@ Install OpenJDK8.
 add-apt-repository -y ppa:openjdk-r/ppa
 apt-get -y update
 apt-get -y install openjdk-8-jdk
+```
+
+Install system package dependencies.
+
+```shell-script
+apt-get -y install swig unzip
+```
+
+Install Python packages
+
+```shell-script
+pip install tensorflow protobuf asciitree mock
 ```
 
 
