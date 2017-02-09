@@ -3,12 +3,6 @@ from setuptools import setup
 from setuptools.command.install import install
 import sys
 import subprocess
-from os import path
-import os
-import pip
-import stat
-import site
-from distutils.sysconfig import get_python_lib
 
 
 class InstallClass(install):
@@ -30,7 +24,9 @@ setup(name='syntaxnet_wrapper',
       packages=['syntaxnet_wrapper'],
       zip_safe=False,
       install_requires=[
-          'protobuf==3.0.0b2',
+          'tensorflow',
+          'virtualenv',
+          'protobuf',
           'asciitree',
           'mock',
       ],
