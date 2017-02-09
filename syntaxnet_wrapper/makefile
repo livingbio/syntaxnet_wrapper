@@ -1,9 +1,9 @@
 all: download_language_models
 
 configure_syntaxnet:
-	echo "************************************************************"
-	echo "                  configure syntaxnet                       "
-	echo "************************************************************"
+	@echo "************************************************************" 1>&2
+	@echo "                  configure syntaxnet                       " 1>&2
+	@echo "************************************************************" 1>&2
 	git clone --recursive https://github.com/tensorflow/models.git && \
 	cd models/syntaxnet/tensorflow && \
 	virtualenv /tmp/venv && \
@@ -11,17 +11,18 @@ configure_syntaxnet:
 	printf '/tmp/venv/bin/python\n\n\n\n\n\n' | ./configure
 
 build_syntaxnet: configure_syntaxnet
-	echo "************************************************************"
-	echo "                     build syntaxnet                        "
-	echo "************************************************************"
+	@echo "************************************************************" 1>&2
+	@echo "                     build syntaxnet                        " 1>&2
+	@echo "************************************************************" 1>&2
 	cd models/syntaxnet && \
 	~/bin/bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
 	rm -rf bazel_root
-	rm tensorflow/util/python/python_lib
+	cd models/syntaxnet && \
+	rm tensorflow/util/python/python_lib && \
 	ln -s `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"` tensorflow/util/python/python_lib
-	echo "************************************************************"
-	echo "                building syntaxnet finished                 "
-	echo "************************************************************"
+	@echo "************************************************************" 1>&2
+	@echo "                building syntaxnet finished                 " 1>&2
+	@echo "************************************************************" 1>&2
 
 copy_demo_scripts: build_syntaxnet
 	cp models/syntaxnet/syntaxnet/models/parsey_universal/parse.sh models/syntaxnet/parse.sh
@@ -30,9 +31,9 @@ copy_demo_scripts: build_syntaxnet
 
 clear_tmp_venv: copy_demo_scripts
 	rm -rf /tmp/venv
-	echo "************************************************************"
-	echo "                 download language models                   "
-	echo "************************************************************"
+	@echo "************************************************************" 1>&2
+	@echo "                 download language models                   " 1>&2
+	@echo "************************************************************" 1>&2
 
 download_language_models: models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek-PROIEL \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek \
