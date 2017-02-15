@@ -95,4 +95,5 @@ signal.signal(signal.SIGABRT, abort_handler)
 while True:
     sys.stdout.write('\n## input content:\n')
     sys.stdout.flush()
+    signal.alarm(1800)
     signal.pause()
