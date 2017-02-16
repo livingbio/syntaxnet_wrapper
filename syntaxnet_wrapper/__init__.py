@@ -11,6 +11,12 @@ from datetime import datetime, timedelta
 __all__ = ['parser', 'tagger']
 pwd = dirname(abspath(__file__))
 
+PIDFILE_PATH = os.path.join(pwd, 'pids')
+PID = os.getpid()
+
+import logging
+import re
+logger = logging.getLogger()
 
 class TimeoutException(Exception):
     pass
@@ -19,6 +25,41 @@ class SyntaxNetWrapper(object):
 
     def __del__(self):
         self.stop()
+
+    def clean_zombie_process(self):
+        pidfiles = os.listdir(PIDFILE_PATH)
+        pidfiles = [f for f in pidfiles if re.match("\d+_.*\.pid", f)]
+        for pidfile in pidfiles:
+            process = pidfile.split('_')[0]
+            try:
+                os.kill(process, 0)
+            except:
+                logger.info('kill zombie process {}'.format(process))
+                self.kill_process(pidfile)
+
+    def kill_process(self, pidfile):
+        try:
+            with open(pidfile) as f:
+                pid = f.read().strip()
+                try:
+                    os.kill(pid, 9)
+                except Exception as e:
+                    logger.info(e)
+        except Exception as e:
+            logger.info(e)
+
+    def make_pidfile(self):
+        pidfilename = os.path.join(PIDFILE_PATH, "{}.pid".format(self.name))
+        if os.exists(pidfilename):
+            self.kill_process(pidfilename)
+
+        with open(pidfilename, 'w+') as f:
+            f.write(self.process.pid)
+
+    @property
+    def name(self):
+        return u"{}_{}".format(PID, self.__class__.__name__)
+
 
     def start(self):
         rundir = join(pwd, 'models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles/__main__')
@@ -33,6 +74,7 @@ class SyntaxNetWrapper(object):
         self.out = self.process.stdout
         self.din = self.process.stdin
         fcntl(self.out.fileno(), F_SETFL, fcntl(self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
+        self.make_pidfile()
 
     def stop(self):
         self.din.close()
