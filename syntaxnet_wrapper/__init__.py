@@ -12,7 +12,6 @@ __all__ = ['parser', 'tagger']
 pwd = dirname(abspath(__file__))
 
 PIDFILE_PATH = os.path.join(pwd, 'pids')
-PID = os.getpid()
 
 import logging
 import re
@@ -27,24 +26,26 @@ class SyntaxNetWrapper(object):
         self.stop()
 
     def clean_zombie_process(self):
-        pidfiles = os.listdir(PIDFILE_PATH)
-        pidfiles = [f for f in pidfiles if re.match("\d+_.*\.pid", f)]
-        for pidfile in pidfiles:
-            process = pidfile.split('_')[0]
+        for pidfile in os.listdir(PIDFILE_PATH):
+            if not pidfile.endswith('.pid') or pidfile.count('_') != 2:
+                continue
+            pid, model, clsname = pidfile.split('_')
             try:
-                os.kill(process, 0)
+                os.kill(int(pid), 0)
+                os.unlink(os.path.join(PIDFILE_PATH, pidfile))
             except:
-                logger.info('kill zombie process {}'.format(process))
+                logger.info('kill zombie process {}'.format(pid))
                 self.kill_process(pidfile)
 
     def kill_process(self, pidfile):
         try:
-            with open(pidfile) as f:
+            with open(os.path.join(PIDFILE_PATH, pidfile)) as f:
                 pid = f.read().strip()
                 try:
-                    os.kill(pid, 9)
+                    os.kill(int(pid), 9)
                 except Exception as e:
                     logger.info(e)
+            os.unlink(os.path.join(PIDFILE_PATH, pidfile))
         except Exception as e:
             logger.info(e)
 
@@ -53,6 +54,8 @@ class SyntaxNetWrapper(object):
             os.mkdir(PIDFILE_PATH)
         pidfilename = os.path.join(PIDFILE_PATH, "{}.pid".format(self.name))
         for fn in os.listdir(PIDFILE_PATH):
+            if not fn.endswith('.pid') or fn.count('_') != 2:
+                continue
             pid, model, clsname = fn.split('_')
             if clsname == self.__class__.__name__ + '.pid' and model == self.model_name:
                 self.kill_process(fn)
@@ -61,7 +64,7 @@ class SyntaxNetWrapper(object):
 
     @property
     def name(self):
-        return u"{}_{}_{}".format(PID, self.model_name, self.__class__.__name__)
+        return u"{}_{}_{}".format(self.process.pid, self.model_name, self.__class__.__name__)
 
 
     def start(self):
@@ -82,8 +85,9 @@ class SyntaxNetWrapper(object):
     def stop(self):
         self.din.close()
         try:
-            os.kill(self.process.pid, signal.SIGKILL)
-            self.process.send_signal(signal.SIGKILL)
+            import signal  # wordaround for AttributeError("'NoneType' object has no attribute 'SIGTERM'",)
+            os.kill(self.process.pid, signal.SIGTERM)
+            self.process.send_signal(signal.SIGTERM)
             self.process.kill()
             self.process.wait()
         except OSError:
