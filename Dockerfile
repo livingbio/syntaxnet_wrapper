@@ -8,10 +8,10 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 RUN apt-key adv --keyserver keyserver.ubuntu.com --recv-keys EEA14886 && apt-get update && apt-get install -y curl dnsutils oracle-java8-installer ca-certificates
 
 
-workdir /root
-run echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
-run curl https://bazel.build/bazel-release.pub.gpg | apt-key add -
-run apt-get update && apt-get install -y bazel
+# install latest bazel 
+# run echo "deb [arch=amd64] http://storage.googleapis.com/bazel-apt stable jdk1.8" | tee /etc/apt/sources.list.d/bazel.list
+# run curl https://bazel.build/bazel-release.pub.gpg | apt-key add -
+# run apt-get update && apt-get install -y bazel
 
 run pip install virtualenv
 
