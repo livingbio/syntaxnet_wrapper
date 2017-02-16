@@ -49,16 +49,19 @@ class SyntaxNetWrapper(object):
             logger.info(e)
 
     def make_pidfile(self):
+        if not os.path.isdir(PIDFILE_PATH):
+            os.mkdir(PIDFILE_PATH)
         pidfilename = os.path.join(PIDFILE_PATH, "{}.pid".format(self.name))
-        if os.exists(pidfilename):
-            self.kill_process(pidfilename)
-
+        for fn in os.listdir(PIDFILE_PATH):
+            pid, model, clsname = fn.split('_')
+            if clsname == self.__class__.__name__ + '.pid' and model == self.model_name:
+                self.kill_process(fn)
         with open(pidfilename, 'w+') as f:
-            f.write(self.process.pid)
+            f.write(str(self.process.pid))
 
     @property
     def name(self):
-        return u"{}_{}".format(PID, self.__class__.__name__)
+        return u"{}_{}_{}".format(PID, self.model_name, self.__class__.__name__)
 
 
     def start(self):
