@@ -37,6 +37,7 @@ class SyntaxNetWrapper(object):
     def stop(self):
         self.din.close()
         try:
+            os.kill(self.process.pid, signal.SIGKILL)
             self.process.send_signal(signal.SIGKILL)
             self.process.kill()
             self.process.wait()
