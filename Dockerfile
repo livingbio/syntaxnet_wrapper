@@ -16,6 +16,6 @@ run apt-get update && apt-get install -y bazel
 run pip install virtualenv
 
 add . /work
+workdir /work
 run wget https://github.com/bazelbuild/bazel/releases/download/0.4.0/bazel-0.4.0-installer-linux-x86_64.sh && chmod +x bazel-0.4.0-installer-linux-x86_64.sh && ./bazel-0.4.0-installer-linux-x86_64.sh
-workdir /work/syntaxnet_wrapper
-run make
+run python setup.py install
