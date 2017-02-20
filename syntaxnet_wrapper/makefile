@@ -7,7 +7,7 @@ configure_syntaxnet:
 	git clone --recursive https://github.com/tensorflow/models.git && \
 	cd models/syntaxnet/tensorflow && \
 	virtualenv /tmp/venv && \
-	/tmp/venv/bin/pip install tensorflow && \
+	/tmp/venv/bin/pip install tensorflow==0.12.1 && \
 	printf '/tmp/venv/bin/python\n\n\n\n\n\n' | ./configure
 
 build_syntaxnet: configure_syntaxnet

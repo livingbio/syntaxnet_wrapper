@@ -8,7 +8,7 @@ import subprocess
 class InstallClass(install):
     def run(self):
         install.run(self)
-        subprocess.call(['pip', 'install', 'tensorflow', 'virtualenv', 'protobuf', 'asciitree', 'mock'])
+        subprocess.call(['pip', 'install', 'tensorflow==0.12.1', 'virtualenv', 'protobuf', 'asciitree', 'mock'])
         sys.path.reverse()
         import syntaxnet_wrapper
         syntaxnet_wrapper_dir = syntaxnet_wrapper.__path__[0]
