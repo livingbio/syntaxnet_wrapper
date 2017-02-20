@@ -7,8 +7,8 @@
 Install `bazel` and include `bazel` in `$PATH`.
 
 ```shell-script
-wget https://github.com/bazelbuild/bazel/releases/download/0.4.4/bazel-0.4.4-installer-linux-x86_64.sh
-chmod +x bazel-0.4.4-installer-linux-x86_64.sh
+wget https://github.com/bazelbuild/bazel/releases/download/0.4.3/bazel-0.4.3-installer-linux-x86_64.sh
+chmod +x bazel-0.4.3-installer-linux-x86_64.sh
 ./bazel-0.4.4-installer-linux-x86_64.sh --user
 rm bazel-0.4.4-installer-linux-x86_64.sh
 export PATH="$PATH:$HOME/bin"
@@ -40,22 +40,6 @@ pip install tensorflow protobuf asciitree mock
 ```shell-script
 pip install git+ssh://git@github.com/livingbio/syntaxnet_wrapper.git#egg=syntaxnet_wrapper
 ```
-
-
-## Possible Problems
-
-The structure of directories in SyntaxNet contain many symbolic links, all of
-them point to absolute paths. To compact the prebuilt directory, we must use
-relative paths in symbolic links. Most symbolic links, point to SyntaxNet root
-directory, can be modified. But there are two kinds of symbolic links we didn't
-modify yet.
-
-1. links to jvm root directory
-    all these links point to `/usr/lib/jvm/java-8-openjdk-amd64`.
-2. links to Python root directory
-    * Python site-packages: `/usr/local/lib/python2.7.12/lib/python2.7/site-packages`
-    * Python include path: `/usr/local/lib/python2.7.12/include`
-
 
 ## Usage
 
