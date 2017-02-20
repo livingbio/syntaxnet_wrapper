@@ -9,8 +9,8 @@ Install `bazel` and include `bazel` in `$PATH`.
 ```shell-script
 wget https://github.com/bazelbuild/bazel/releases/download/0.4.3/bazel-0.4.3-installer-linux-x86_64.sh
 chmod +x bazel-0.4.3-installer-linux-x86_64.sh
-./bazel-0.4.4-installer-linux-x86_64.sh --user
-rm bazel-0.4.4-installer-linux-x86_64.sh
+./bazel-0.4.3-installer-linux-x86_64.sh --user
+rm bazel-0.4.3-installer-linux-x86_64.sh
 export PATH="$PATH:$HOME/bin"
 ```
 
