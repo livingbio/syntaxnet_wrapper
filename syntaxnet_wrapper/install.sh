@@ -1,25 +1,16 @@
 #!/bin/sh
 
-#
-# Install bazel 0.2.2b
-#
-wget https://github.com/bazelbuild/bazel/releases/download/0.2.2b/bazel-0.2.2b-installer-linux-x86_64.sh
-chmod +x bazel-0.2.2b-installer-linux-x86_64.sh
-./bazel-0.2.2b-installer-linux-x86_64.sh --user
-rm bazel-0.2.2b-installer-linux-x86_64.sh
+# python package dependencies
+# option-1: you have root permissions
+# option-2: you are inside virtual environment
+pip install tensorflow protobuf asciitree mock
 
 #
 # SyntaxNet original version (installed as a normal user)
 #
-export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.10.0rc0-cp27-none-linux_x86_64.whl
-sudo pip install --upgrade $TF_BINARY_URL
-sudo apt-get -y install swig unzip
-sudo pip install -U protobuf==3.0.0b2
-sudo pip install asciitree
-###
 git clone --recursive https://github.com/tensorflow/models.git
 cd models/syntaxnet/tensorflow
-./configure < /dev/null  # no Google Cloud Platform support, no GPU support
+printf '\n\n\n\n\n\n' | ./configure  # input everything as default
 cd ..
 ~/bin/bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/...
 # The --output_user_root ensures that all of the build output is

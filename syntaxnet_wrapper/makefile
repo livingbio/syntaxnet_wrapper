@@ -1,5 +1,41 @@
+all: download_language_models
 
-all: models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek-PROIEL \
+configure_syntaxnet:
+	@echo "************************************************************" 1>&2
+	@echo "                  configure syntaxnet                       " 1>&2
+	@echo "************************************************************" 1>&2
+	git clone --recursive https://github.com/tensorflow/models.git && \
+	cd models/syntaxnet/tensorflow && \
+	virtualenv /tmp/venv && \
+	/tmp/venv/bin/pip install tensorflow==0.12.1 && \
+	printf '/tmp/venv/bin/python\n\n\n\n\n\n' | ./configure
+
+build_syntaxnet: configure_syntaxnet
+	@echo "************************************************************" 1>&2
+	@echo "                     build syntaxnet                        " 1>&2
+	@echo "************************************************************" 1>&2
+	cd models/syntaxnet && \
+	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
+	rm -rf bazel_root
+	cd models/syntaxnet && \
+	rm tensorflow/util/python/python_lib && \
+	ln -s `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"` tensorflow/util/python/python_lib
+	@echo "************************************************************" 1>&2
+	@echo "                building syntaxnet finished                 " 1>&2
+	@echo "************************************************************" 1>&2
+
+copy_demo_scripts: build_syntaxnet
+	cp models/syntaxnet/syntaxnet/models/parsey_universal/parse.sh models/syntaxnet/parse.sh
+	cp models/syntaxnet/syntaxnet/models/parsey_universal/tokenize.sh models/syntaxnet/tokenize.sh
+	cp models/syntaxnet/syntaxnet/models/parsey_universal/tokenize_zh.sh models/syntaxnet/tokenize_zh.sh
+
+clear_tmp_venv: copy_demo_scripts
+	rm -rf /tmp/venv
+	@echo "************************************************************" 1>&2
+	@echo "                 download language models                   " 1>&2
+	@echo "************************************************************" 1>&2
+
+download_language_models: models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek-PROIEL \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Arabic \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Basque \
@@ -52,33 +88,8 @@ all: models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek-PROIEL \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Tamil \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Turkish
 
-models: 
-	git clone --recursive https://github.com/tensorflow/models.git && \
-	cd models && \
-	git checkout f98c5ded31d7da0c2d127c28b2c16f0307a368f0 && \
-	git submodule update && \
-	cd syntaxnet/tensorflow && \
-	git clean -fd && \
-	./configure < /dev/null 
-
-models/syntaxnet/bazel_root: models
-	cd models/syntaxnet && \
-    	~/bin/bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
-	rm -rf bazel_root
-
-models/syntaxnet/parse.sh: models
-	cp models/syntaxnet/syntaxnet/models/parsey_universal/parse.sh models/syntaxnet/parse.sh
-
-models/syntaxnet/tokenize.sh: models
-	cp models/syntaxnet/syntaxnet/models/parsey_universal/tokenize.sh models/syntaxnet/tokenize.sh
-
-models/syntaxnet/tokenize_zh.sh: models
-	cp models/syntaxnet/syntaxnet/models/parsey_universal/tokenize_zh.sh models/syntaxnet/tokenize_zh.sh
-
-models/syntaxnet/syntaxnet/models/parsey_universal/%: models/syntaxnet/bazel_root models/syntaxnet/parse.sh models/syntaxnet/tokenize.sh models/syntaxnet/tokenize_zh.sh
+models/syntaxnet/syntaxnet/models/parsey_universal/%: clear_tmp_venv
 	cd models/syntaxnet/syntaxnet/models/parsey_universal/ && \
-    	wget http://download.tensorflow.org/models/parsey_universal/$*.zip && \
-    	unzip $*.zip && \
-    	rm $*.zip
-
-
+	wget http://download.tensorflow.org/models/parsey_universal/$*.zip && \
+	unzip $*.zip && \
+	rm $*.zip

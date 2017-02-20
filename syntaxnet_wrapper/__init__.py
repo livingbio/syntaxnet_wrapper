@@ -11,6 +11,11 @@ from datetime import datetime, timedelta
 __all__ = ['parser', 'tagger']
 pwd = dirname(abspath(__file__))
 
+PIDFILE_PATH = os.path.join(pwd, 'pids')
+
+import logging
+import re
+logger = logging.getLogger()
 
 class TimeoutException(Exception):
     pass
@@ -20,11 +25,51 @@ class SyntaxNetWrapper(object):
     def __del__(self):
         self.stop()
 
+    def clean_zombie_process(self):
+        for pidfile in os.listdir(PIDFILE_PATH):
+            if not pidfile.endswith('.pid') or pidfile.count('_') != 2:
+                continue
+            pid, model, clsname = pidfile.split('_')
+            try:
+                os.kill(int(pid), 0)
+                os.unlink(os.path.join(PIDFILE_PATH, pidfile))
+            except:
+                logger.info('kill zombie process {}'.format(pid))
+                self.kill_process(pidfile)
+
+    def kill_process(self, pidfile):
+        try:
+            with open(os.path.join(PIDFILE_PATH, pidfile)) as f:
+                pid = f.read().strip()
+                try:
+                    os.kill(int(pid), 9)
+                except Exception as e:
+                    logger.info(e)
+            os.unlink(os.path.join(PIDFILE_PATH, pidfile))
+        except Exception as e:
+            logger.info(e)
+
+    def make_pidfile(self):
+        if not os.path.isdir(PIDFILE_PATH):
+            os.mkdir(PIDFILE_PATH)
+        pidfilename = os.path.join(PIDFILE_PATH, "{}.pid".format(self.name))
+        for fn in os.listdir(PIDFILE_PATH):
+            if not fn.endswith('.pid') or fn.count('_') != 2:
+                continue
+            pid, model, clsname = fn.split('_')
+            if clsname == self.__class__.__name__ + '.pid' and model == self.model_name:
+                self.kill_process(fn)
+        with open(pidfilename, 'w+') as f:
+            f.write(str(self.process.pid))
+
+    @property
+    def name(self):
+        return u"{}_{}_{}".format(os.getpid(), self.model_name, self.__class__.__name__)
+
+
     def start(self):
-        rundir = join(
-            pwd, 'models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles')
-        command = ['python', self.run_filename,
-                   self.model_path, self.context_path]
+        rundir = join(pwd, 'models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles/__main__')
+        command = ['python', self.run_filename, self.model_path, self.context_path]
 
         env = os.environ.copy()
         env['PYTHONPATH'] = rundir
@@ -34,13 +79,15 @@ class SyntaxNetWrapper(object):
         self.process = subprocess.Popen(command, shell=False, **subproc_args)
         self.out = self.process.stdout
         self.din = self.process.stdin
-        fcntl(self.out.fileno(), F_SETFL, fcntl(
-            self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
+        fcntl(self.out.fileno(), F_SETFL, fcntl(self.out.fileno(), F_GETFD) | os.O_NONBLOCK)
+        self.make_pidfile()
 
     def stop(self):
         self.din.close()
         try:
-            self.process.send_signal(signal.SIGABRT)
+            import signal  # wordaround for AttributeError("'NoneType' object has no attribute 'SIGTERM'",)
+            os.kill(self.process.pid, signal.SIGTERM)
+            self.process.send_signal(signal.SIGTERM)
             self.process.kill()
             self.process.wait()
         except OSError:
@@ -58,8 +105,7 @@ class SyntaxNetWrapper(object):
             model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/Chinese'
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context-tokenize-zh.pbtxt'
         else:
-            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(
-                model_name)
+            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(model_name)
             context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context.pbtxt'
 
         context_path = join(pwd, context_path)
@@ -117,8 +163,7 @@ class SyntaxNetWrapper(object):
 
     def list_models(self):
         pwd = dirname(abspath(__file__))
-        model_path = os.path.join(
-            pwd, 'models/syntaxnet/syntaxnet/models/parsey_universal')
+        model_path = os.path.join(pwd, 'models/syntaxnet/syntaxnet/models/parsey_universal')
         files = os.listdir(model_path)
         models = []
         for fn in files:
@@ -131,8 +176,7 @@ class SyntaxNetWrapper(object):
 class SyntaxNetTokenizer(SyntaxNetWrapper):
 
     def __init__(self, model_name='ZHTokenizer'):
-        super(SyntaxNetTokenizer, self).__init__(
-            'tokenizer_eval_forever.py', model_name)
+        super(SyntaxNetTokenizer, self).__init__('tokenizer_eval_forever.py', model_name)
 
     def query(self, text):
         return super(SyntaxNetTokenizer, self).query(text, returnRaw=True)
@@ -145,8 +189,7 @@ class SyntaxNetMorpher(SyntaxNetWrapper):
             self.tokenizer = SyntaxNetTokenizer()
         else:
             self.tokenizer = None
-        super(SyntaxNetMorpher, self).__init__(
-            'morpher_eval_forever.py', model_name)
+        super(SyntaxNetMorpher, self).__init__('morpher_eval_forever.py', model_name)
 
     def query(self, text, returnRaw=False):
         if self.tokenizer:
@@ -168,8 +211,7 @@ class SyntaxNetTagger(SyntaxNetWrapper):
             self.morpher = kwargs['morpher']
         else:
             self.morpher = SyntaxNetMorpher(model_name)
-        super(SyntaxNetTagger, self).__init__(
-            'tagger_eval_forever.py', model_name)
+        super(SyntaxNetTagger, self).__init__('tagger_eval_forever.py', model_name)
 
     def query(self, morphed_text, returnRaw=False):
         if self.morpher:
@@ -196,8 +238,7 @@ class SyntaxNetParser(SyntaxNetWrapper):
             else:
                 self.morpher = SyntaxNetMorpher(model_name)
             self.tagger = SyntaxNetTagger(model_name, morpher=self.morpher)
-        super(SyntaxNetParser, self).__init__(
-            'parser_eval_forever.py', model_name)
+        super(SyntaxNetParser, self).__init__('parser_eval_forever.py', model_name)
 
     def query(self, text, returnRaw=False):
         conll_text = self.tagger.query(text, returnRaw=True)
