@@ -64,7 +64,7 @@ class SyntaxNetWrapper(object):
 
     @property
     def name(self):
-        return u"{}_{}_{}".format(self.process.pid, self.model_name, self.__class__.__name__)
+        return u"{}_{}_{}".format(os.getpid(), self.model_name, self.__class__.__name__)
 
 
     def start(self):

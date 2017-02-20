@@ -15,7 +15,7 @@ build_syntaxnet: configure_syntaxnet
 	@echo "                     build syntaxnet                        " 1>&2
 	@echo "************************************************************" 1>&2
 	cd models/syntaxnet && \
-	~/bin/bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
+	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
 	rm -rf bazel_root
 	cd models/syntaxnet && \
 	rm tensorflow/util/python/python_lib && \
