@@ -1,5 +1,6 @@
 import subprocess
 import os
+import stat
 import six
 import signal
 
@@ -61,6 +62,7 @@ class SyntaxNetWrapper(object):
                 self.kill_process(fn)
         with open(pidfilename, 'w+') as f:
             f.write(str(self.process.pid))
+        os.chmod(pidfilename, stat.S_IROTH | stat.S_IWOTH)
 
     @property
     def name(self):

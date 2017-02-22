@@ -92,4 +92,8 @@ models/syntaxnet/syntaxnet/models/parsey_universal/%: clear_tmp_venv
 	cd models/syntaxnet/syntaxnet/models/parsey_universal/ && \
 	wget http://download.tensorflow.org/models/parsey_universal/$*.zip && \
 	unzip $*.zip && \
+	cd $* && \
+	chmod 644 * && \
+	cd .. && \
+	chmod 755 $* && \
 	rm $*.zip
