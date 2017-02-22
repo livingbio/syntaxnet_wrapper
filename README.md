@@ -2,9 +2,19 @@
 
 ## Installation
 
-#### Prerequisites
+### Prerequisites
 
-Install `bazel` and include `bazel` in `$PATH`.
+#### Install OpenJDK8.
+
+```shell-script
+add-apt-repository -y ppa:openjdk-r/ppa
+apt-get -y update
+apt-get -y install openjdk-8-jdk
+```
+
+#### Install `bazel` and include `bazel` in `$PATH`.
+
+**Note:** Only bazel 0.4.3 is runnable. bazel 0.4.4 may cause errors.
 
 ```shell-script
 wget https://github.com/bazelbuild/bazel/releases/download/0.4.3/bazel-0.4.3-installer-linux-x86_64.sh
@@ -14,24 +24,18 @@ rm bazel-0.4.3-installer-linux-x86_64.sh
 export PATH="$PATH:$HOME/bin"
 ```
 
-Install OpenJDK8.
-
-```shell-script
-add-apt-repository -y ppa:openjdk-r/ppa
-apt-get -y update
-apt-get -y install openjdk-8-jdk
-```
-
-Install system package dependencies.
+#### Install system package dependencies.
 
 ```shell-script
 apt-get -y install swig unzip
 ```
 
-Install Python packages
+#### Install Python packages
+
+**Note:** Current version of syntaxnet isn't compatible with tensorflow r1.0.
 
 ```shell-script
-pip install tensorflow protobuf asciitree mock
+pip install tensorflow==0.12.1 protobuf asciitree mock
 ```
 
 
