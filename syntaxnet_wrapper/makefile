@@ -31,6 +31,8 @@ copy_demo_scripts: build_syntaxnet
 
 clear_tmp_venv: copy_demo_scripts
 	rm -rf /tmp/venv
+	mkdir pids
+	chmod 777 pids
 	@echo "************************************************************" 1>&2
 	@echo "                 download language models                   " 1>&2
 	@echo "************************************************************" 1>&2

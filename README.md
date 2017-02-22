@@ -45,6 +45,29 @@ pip install tensorflow==0.12.1 protobuf asciitree mock
 pip install git+ssh://git@github.com/livingbio/syntaxnet_wrapper.git#egg=syntaxnet_wrapper
 ```
 
+#### If installation failed...
+
+Execute [test.sh](https://github.com/livingbio/syntaxnet_wrapper/blob/master/syntaxnet_wrapper/test.sh), you should see following outputs:
+
+```
+1       Bob     _       PROPN   NNP     Number=Sing|fPOS=PROPN++NNP     2       nsubj   _       _
+2       brought _       VERB    VBD     Mood=Ind|Tense=Past|VerbForm=Fin|fPOS=VERB++VBD 0       ROOT    _ _
+3       the     _       DET     DT      Definite=Def|PronType=Art|fPOS=DET++DT  4       det     _       _
+4       pizza   _       NOUN    NN      Number=Sing|fPOS=NOUN++NN       2       dobj    _       _
+5       to      _       ADP     IN      fPOS=ADP++IN    6       case    _       _
+6       Alice.  _       PROPN   NNP     Number=Sing|fPOS=PROPN++NNP     2       nmod    _       _
+
+1       球      _       PROPN   NNP     fPOS=PROPN++NNP 4       nsubj   _       _
+2       從      _       ADP     IN      fPOS=ADP++IN    3       case    _       _
+3       天上    _       NOUN    NN      fPOS=NOUN++NN   4       nmod    _       _
+4       掉      _       VERB    VV      fPOS=VERB++VV   0       ROOT    _       _
+5       下來    _       VERB    VV      fPOS=VERB++VV   4       mark    _       _
+
+球 從天 上 掉 下 來
+```
+
+If the outputs are correct, problems are caused by the wrapper. If the outputs are wrong, compilation of syntaxnet may be failed.
+
 ## Usage
 
 ```python
