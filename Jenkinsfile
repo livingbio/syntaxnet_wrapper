@@ -4,7 +4,7 @@ node('small') {
         docker.build('test')
     }
     stage('push') {
-    	docker.withRegistry("https://565110903685.dkr.ecr.us-west-2.amazonaws.com/jenkins", "ecr:a-credential-id") {
+    	docker.withRegistry("https://565110903685.dkr.ecr.us-west-2.amazonaws.com/jenkins", "ecr:us-west-2:aws") {
   			docker.image("test").push()
 		}
     }
