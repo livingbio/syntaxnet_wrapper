@@ -4,10 +4,12 @@ configure_syntaxnet:
 	@echo "************************************************************" 1>&2
 	@echo "                  configure syntaxnet                       " 1>&2
 	@echo "************************************************************" 1>&2
-	git clone --recursive https://github.com/tensorflow/models.git && \
-	cd models/syntaxnet/tensorflow && \
+	git clone https://github.com/tensorflow/models.git && \
+	cd models && git checkout afdcf7d4270f91f8b2be38c77f6662c270e8b6ee && git submodule init && git submodule update && \
+	cd syntaxnet/tensorflow && \
 	pip install tensorflow==0.12.1 && \
 	printf '\n\n\n\n\n\n\n' | ./configure
+
 
 build_syntaxnet: configure_syntaxnet
 	@echo "************************************************************" 1>&2
