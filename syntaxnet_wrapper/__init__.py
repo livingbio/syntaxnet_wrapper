@@ -68,7 +68,7 @@ class SyntaxNetWrapper(object):
 
 
     def start(self):
-        rundir = join(pwd, 'models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles/__main__')
+        rundir = "/opt/tensorflow/models/syntaxnet/bazel-bin/syntaxnet/parser_eval.runfiles/__main__"
         command = ['python', self.run_filename, self.model_path, self.context_path]
 
         env = os.environ.copy()
@@ -99,14 +99,14 @@ class SyntaxNetWrapper(object):
         self.run_filename = run_filename
 
         if model_name == 'English-Parsey':
-            model_path = 'models/syntaxnet'
-            context_path = 'models/syntaxnet/syntaxnet/models/parsey_mcparseface/context.pbtxt'
+            model_path = '/opt/tensorflow/models/syntaxnet'
+            context_path = '/opt/tensorflow/models/syntaxnet/syntaxnet/models/parsey_mcparseface/context.pbtxt'
         elif model_name == 'ZHTokenizer':
-            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/Chinese'
-            context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context-tokenize-zh.pbtxt'
+            model_path = '/opt/tensorflow/models/syntaxnet/syntaxnet/models/parsey_universal/Chinese'
+            context_path = '/opt/tensorflow/models/syntaxnet/syntaxnet/models/parsey_universal/context-tokenize-zh.pbtxt'
         else:
-            model_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(model_name)
-            context_path = 'models/syntaxnet/syntaxnet/models/parsey_universal/context.pbtxt'
+            model_path = '/opt/tensorflow/models/syntaxnet/syntaxnet/models/parsey_universal/{!s}'.format(model_name)
+            context_path = '/opt/tensorflow/models/syntaxnet/syntaxnet/models/parsey_universal/context.pbtxt'
 
         context_path = join(pwd, context_path)
         model_path = join(pwd, model_path)

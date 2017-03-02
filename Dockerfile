@@ -33,7 +33,14 @@ RUN apt-get update \
 #run apt-get update && apt-get install -y bazel
 
 run pip install virtualenv
+run pip install virtualenv tensorflow==0.12.1
 
-add . /work
-workdir /work
-run python setup.py install
+ENV SYNTAXNETDIR=/opt/tensorflow
+RUN mkdir $SYNTAXNETDIR
+
+ADD makefile /tmp/makefile
+RUN cp /tmp/makefile $SYNTAXNETDIR/makefile
+
+RUN cd $SYNTAXNETDIR && \ 
+    make
+
