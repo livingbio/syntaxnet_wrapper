@@ -1,4 +1,4 @@
-from gliacloud/base_images:django
+FROM gliacloud/base_images:django
 
 run apt-get install python-software-properties software-properties-common python-software-properties  -y
 
