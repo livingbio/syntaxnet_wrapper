@@ -10,9 +10,6 @@ class InstallClass(install):
         install.run(self)
         subprocess.call(['pip', 'install', 'tensorflow==0.12.1', 'virtualenv', 'protobuf', 'asciitree', 'mock'])
         sys.path.reverse()
-        import syntaxnet_wrapper
-        syntaxnet_wrapper_dir = syntaxnet_wrapper.__path__[0]
-        subprocess.call(['make'], cwd=syntaxnet_wrapper_dir)
 
 
 setup(name='syntaxnet_wrapper',
