@@ -12,6 +12,9 @@ RUN apt-get -y update
 RUN apt-get -y install openjdk-8-jdk
 RUN apt-get install -y swig unzip wget
 
+RUN apt-get install ca-certificates-java
+RUN update-ca-certificates -f
+
 
 RUN apt-get update \
     && apt-get install git zlib1g-dev file swig python2.7 python-dev python-pip python-mock -y \
