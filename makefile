@@ -6,17 +6,16 @@ configure_syntaxnet:
 	@echo "************************************************************" 1>&2
 	git clone --recursive https://github.com/tensorflow/models.git && \
 	cd models/syntaxnet/tensorflow && \
-	virtualenv /tmp/venv && \
-	/tmp/venv/bin/pip install tensorflow==0.12.1 && \
-	printf '/tmp/venv/bin/python\n\n\n\n\n\n' | ./configure
+	pip install tensorflow==0.12.1 && \
+	printf '\n\n\n\n\n\n\n' | ./configure
 
 build_syntaxnet: configure_syntaxnet
 	@echo "************************************************************" 1>&2
 	@echo "                     build syntaxnet                        " 1>&2
 	@echo "************************************************************" 1>&2
 	cd models/syntaxnet && \
-	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
-	rm -rf bazel_root
+	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... 
+
 	cd models/syntaxnet && \
 	rm tensorflow/util/python/python_lib && \
 	ln -s `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"` tensorflow/util/python/python_lib
@@ -88,7 +87,7 @@ download_language_models: models/syntaxnet/syntaxnet/models/parsey_universal/Anc
 	models/syntaxnet/syntaxnet/models/parsey_universal/Tamil \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Turkish
 
-models/syntaxnet/syntaxnet/models/parsey_universal/%: 
+models/syntaxnet/syntaxnet/models/parsey_universal/%: clear_tmp_venv
 	cd models/syntaxnet/syntaxnet/models/parsey_universal/ && \
 	wget http://download.tensorflow.org/models/parsey_universal/$*.zip && \
 	unzip $*.zip && \
