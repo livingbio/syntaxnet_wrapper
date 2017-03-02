@@ -5,7 +5,7 @@ node('small') {
     }
 
     stage('check'){
-        docker.withDockerContainer(image:"jenkins:syntaxnet"){
+        withDockerContainer('jenkins:syntaxnet') {
             sh 'python test.py'
         }
     }
