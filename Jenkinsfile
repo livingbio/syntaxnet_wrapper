@@ -14,13 +14,16 @@ node('small') {
         
 		withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 			sh "docker login --password=${PASSWORD} --username=${USERNAME}"
-			sh "docker pull gliacloud/syntaxnet"
-			def now = new Date()
-			def key = now.format("yyyyMMdd-HH", TimeZone.getTimeZone('UTC'))
-			sh "docker tag gliacloud/syntaxnet gliacloud/syntaxnet:" + key
+            try{
+                def now = new Date()
+                def key = now.format("yyyyMMdd-HH", TimeZone.getTimeZone('UTC'))
+                sh "docker pull gliacloud/syntaxnet"
+                sh "docker tag gliacloud/syntaxnet gliacloud/syntaxnet:" + key
+                sh "docker push gliacloud/syntaxnet:" + key
+            } catch (err) {
+            }
 			sh "docker tag jenkins:syntaxnet gliacloud/base_images:syntaxnet"
 			sh "docker push gliacloud/syntaxnet"
-			sh "docker push gliacloud/syntaxnet:" + key
 		}
     }
 }
