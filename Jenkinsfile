@@ -22,7 +22,7 @@ node('small') {
                 sh "docker push gliacloud/syntaxnet:" + key
             } catch (err) {
             }
-			sh "docker tag jenkins:syntaxnet gliacloud/base_images:syntaxnet"
+			sh "docker tag jenkins:syntaxnet gliacloud/syntaxnet"
 			sh "docker push gliacloud/syntaxnet"
 		}
     }
