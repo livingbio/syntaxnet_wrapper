@@ -11,8 +11,16 @@ node('small') {
     }
 
     stage('Deploy') {
-    	docker.withRegistry("https://565110903685.dkr.ecr.us-west-2.amazonaws.com/jenkins", "ecr:us-west-2:aws") {
-  			docker.image("jenkins:syntaxnet").push()
+        
+		withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'dockerhub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
+			sh "docker login --password=${PASSWORD} --username=${USERNAME}"
+			sh "docker pull gliacloud/syntaxnet"
+			def now = new Date()
+			def key = now.format("yyyyMMdd-HH", TimeZone.getTimeZone('UTC'))
+			sh "docker tag gliacloud/syntaxnet gliacloud/syntaxnet:" + key
+			sh "docker tag jenkins:syntaxnet gliacloud/base_images:syntaxnet"
+			sh "docker push gliacloud/syntaxnet"
+			sh "docker push gliacloud/syntaxnet:" + key
 		}
     }
 }
