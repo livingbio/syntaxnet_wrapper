@@ -1,4 +1,4 @@
-node('small') {
+node('large') {
     checkout scm
     stage('Build') {
         docker.build('jenkins:syntaxnet')
