@@ -8,7 +8,7 @@ configure_syntaxnet:
 	cd models/syntaxnet/tensorflow && \
 	virtualenv /tmp/venv && \
 	/tmp/venv/bin/pip install tensorflow==0.12.1 && \
-	printf '/tmp/venv/bin/python\n\n\n\n\n\n' | ./configure
+	printf '/tmp/venv/bin/python\n\n\n\n\n\n\n\n\n\n\n\n\n\n' | ./configure
 
 build_syntaxnet: configure_syntaxnet
 	@echo "************************************************************" 1>&2
