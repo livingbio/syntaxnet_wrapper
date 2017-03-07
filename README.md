@@ -2,9 +2,19 @@
 
 ## Installation
 
-#### Prerequisites
+### Prerequisites
 
-Install `bazel` and include `bazel` in `$PATH`.
+#### Install OpenJDK8.
+
+```shell-script
+add-apt-repository -y ppa:openjdk-r/ppa
+apt-get -y update
+apt-get -y install openjdk-8-jdk
+```
+
+#### Install `bazel` and include `bazel` in `$PATH`.
+
+**Note:** Only bazel 0.4.3 is runnable. bazel 0.4.4 may cause errors.
 
 ```shell-script
 wget https://github.com/bazelbuild/bazel/releases/download/0.4.3/bazel-0.4.3-installer-linux-x86_64.sh
@@ -14,21 +24,15 @@ rm bazel-0.4.3-installer-linux-x86_64.sh
 export PATH="$PATH:$HOME/bin"
 ```
 
-Install OpenJDK8.
-
-```shell-script
-add-apt-repository -y ppa:openjdk-r/ppa
-apt-get -y update
-apt-get -y install openjdk-8-jdk
-```
-
-Install system package dependencies.
+#### Install system package dependencies.
 
 ```shell-script
 apt-get -y install swig unzip
 ```
 
-Install Python packages
+#### Install Python packages
+
+**Note:** Current version of syntaxnet must be used with tensorflow r1.0.
 
 ```shell-script
 pip install tensorflow protobuf asciitree mock
@@ -40,6 +44,29 @@ pip install tensorflow protobuf asciitree mock
 ```shell-script
 pip install git+ssh://git@github.com/livingbio/syntaxnet_wrapper.git#egg=syntaxnet_wrapper
 ```
+
+#### If installation failed...
+
+Execute [test.sh](https://github.com/livingbio/syntaxnet_wrapper/blob/master/syntaxnet_wrapper/test.sh), you should see following outputs:
+
+```
+1       Bob     _       PROPN   NNP     Number=Sing|fPOS=PROPN++NNP     2       nsubj   _       _
+2       brought _       VERB    VBD     Mood=Ind|Tense=Past|VerbForm=Fin|fPOS=VERB++VBD 0       ROOT    _ _
+3       the     _       DET     DT      Definite=Def|PronType=Art|fPOS=DET++DT  4       det     _       _
+4       pizza   _       NOUN    NN      Number=Sing|fPOS=NOUN++NN       2       dobj    _       _
+5       to      _       ADP     IN      fPOS=ADP++IN    6       case    _       _
+6       Alice.  _       PROPN   NNP     Number=Sing|fPOS=PROPN++NNP     2       nmod    _       _
+
+1       球      _       PROPN   NNP     fPOS=PROPN++NNP 4       nsubj   _       _
+2       從      _       ADP     IN      fPOS=ADP++IN    3       case    _       _
+3       天上    _       NOUN    NN      fPOS=NOUN++NN   4       nmod    _       _
+4       掉      _       VERB    VV      fPOS=VERB++VV   0       ROOT    _       _
+5       下來    _       VERB    VV      fPOS=VERB++VV   4       mark    _       _
+
+球 從天 上 掉 下 來
+```
+
+If the outputs are correct, problems are caused by the wrapper. If the outputs are wrong, compilation of syntaxnet may be failed.
 
 ## Usage
 
@@ -66,16 +93,16 @@ print parser['en'].query('Alice drove down the street in her car', returnRaw=Tru
 
 # use Chinese model
 print tagger['zh'].query(u'今天 天氣 很 好', returnRaw=True)
-# 1       今天    _       NOUN    NN      _       0       _       _       _
-# 2       天氣    _       NOUN    NN      _       0       _       _       _
-# 3       很      _       ADV     RB      _       0       _       _       _
-# 4       好      _       ADJ     JJ      _       0       _       _       _
+# 1       今天    _       NOUN    NN      fPOS=NOUN++NN   0       _       _       _
+# 2       天氣    _       NOUN    NN      fPOS=NOUN++NN   0       _       _       _
+# 3       很      _       ADV     RB      fPOS=ADV++RB    0       _       _       _
+# 4       好      _       ADJ     JJ      fPOS=ADJ++JJ    0       _       _       _
 
 print parser['zh'].query(u'今天 天氣 很 好', returnRaw=True)
-# 1       今天    _       NOUN    NN      _       4       nmod:tmod       _       _
-# 2       天氣    _       NOUN    NN      _       4       nsubj   _       _
-# 3       很      _       ADV     RB      _       4       advmod  _       _
-# 4       好      _       ADJ     JJ      _       0       ROOT    _       _
+# 1       今天    _       NOUN    NN      fPOS=NOUN++NN   4       nmod:tmod       _       _
+# 2       天氣    _       NOUN    NN      fPOS=NOUN++NN   4       nsubj   _       _
+# 3       很      _       ADV     RB      fPOS=ADV++RB    4       advmod  _       _
+# 4       好      _       ADJ     JJ      fPOS=ADJ++JJ    0       ROOT    _       _
 ```
 
 ### Language Selection

@@ -7,8 +7,8 @@ configure_syntaxnet:
 	git clone --recursive https://github.com/tensorflow/models.git && \
 	cd models/syntaxnet/tensorflow && \
 	virtualenv /tmp/venv && \
-	/tmp/venv/bin/pip install tensorflow==0.12.1 && \
-	printf '/tmp/venv/bin/python\n\n\n\n\n\n' | ./configure
+	/tmp/venv/bin/pip install tensorflow && \
+	printf '/tmp/venv/bin/python\n\n\n\n\n\n\n\n\n\n\n\n\n\n' | ./configure
 
 build_syntaxnet: configure_syntaxnet
 	@echo "************************************************************" 1>&2
@@ -31,6 +31,8 @@ copy_demo_scripts: build_syntaxnet
 
 clear_tmp_venv: copy_demo_scripts
 	rm -rf /tmp/venv
+	mkdir pids
+	chmod 777 pids
 	@echo "************************************************************" 1>&2
 	@echo "                 download language models                   " 1>&2
 	@echo "************************************************************" 1>&2
@@ -92,4 +94,8 @@ models/syntaxnet/syntaxnet/models/parsey_universal/%:
 	cd models/syntaxnet/syntaxnet/models/parsey_universal/ && \
 	wget http://download.tensorflow.org/models/parsey_universal/$*.zip && \
 	unzip $*.zip && \
+	cd $* && \
+	chmod 644 * && \
+	cd .. && \
+	chmod 755 $* && \
 	rm $*.zip
