@@ -4,20 +4,19 @@ configure_syntaxnet:
 	@echo "************************************************************" 1>&2
 	@echo "                  configure syntaxnet                       " 1>&2
 	@echo "************************************************************" 1>&2
-	git clone https://github.com/tensorflow/models.git && \
-	cd models && git checkout afdcf7d4270f91f8b2be38c77f6662c270e8b6ee && git submodule init && git submodule update && \
-	cd syntaxnet/tensorflow && \
-	pip install tensorflow==0.12.1 && \
-	printf '\n\n\n\n\n\n\n' | ./configure
-
+	git clone --recursive https://github.com/tensorflow/models.git && \
+	cd models/syntaxnet/tensorflow && \
+	virtualenv /tmp/venv && \
+	/tmp/venv/bin/pip install tensorflow && \
+	printf '/tmp/venv/bin/python\n\n\n\n\n\n\n\n\n\n\n\n\n\n' | ./configure
 
 build_syntaxnet: configure_syntaxnet
 	@echo "************************************************************" 1>&2
 	@echo "                     build syntaxnet                        " 1>&2
 	@echo "************************************************************" 1>&2
 	cd models/syntaxnet && \
-	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... 
-
+	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
+	rm -rf bazel_root
 	cd models/syntaxnet && \
 	rm tensorflow/util/python/python_lib && \
 	ln -s `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"` tensorflow/util/python/python_lib
@@ -32,6 +31,8 @@ copy_demo_scripts: build_syntaxnet
 
 clear_tmp_venv: copy_demo_scripts
 	rm -rf /tmp/venv
+	mkdir pids
+	chmod 777 pids
 	@echo "************************************************************" 1>&2
 	@echo "                 download language models                   " 1>&2
 	@echo "************************************************************" 1>&2
@@ -93,4 +94,8 @@ models/syntaxnet/syntaxnet/models/parsey_universal/%: clear_tmp_venv
 	cd models/syntaxnet/syntaxnet/models/parsey_universal/ && \
 	wget http://download.tensorflow.org/models/parsey_universal/$*.zip && \
 	unzip $*.zip && \
+	cd $* && \
+	chmod 644 * && \
+	cd .. && \
+	chmod 755 $* && \
 	rm $*.zip

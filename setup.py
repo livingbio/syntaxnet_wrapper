@@ -22,7 +22,7 @@ setup(name='syntaxnet_wrapper',
       packages=['syntaxnet_wrapper'],
       zip_safe=False,
       install_requires=[
-          'tensorflow',
+          'tensorflow==1.0.0',
           'virtualenv',
           'protobuf',
           'asciitree',
