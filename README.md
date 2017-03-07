@@ -32,10 +32,10 @@ apt-get -y install swig unzip
 
 #### Install Python packages
 
-**Note:** Current version of syntaxnet isn't compatible with tensorflow r1.0.
+**Note:** Current version of syntaxnet must be used with tensorflow r1.0.
 
 ```shell-script
-pip install tensorflow==0.12.1 protobuf asciitree mock
+pip install tensorflow protobuf asciitree mock
 ```
 
 
@@ -93,16 +93,16 @@ print parser['en'].query('Alice drove down the street in her car', returnRaw=Tru
 
 # use Chinese model
 print tagger['zh'].query(u'今天 天氣 很 好', returnRaw=True)
-# 1       今天    _       NOUN    NN      _       0       _       _       _
-# 2       天氣    _       NOUN    NN      _       0       _       _       _
-# 3       很      _       ADV     RB      _       0       _       _       _
-# 4       好      _       ADJ     JJ      _       0       _       _       _
+# 1       今天    _       NOUN    NN      fPOS=NOUN++NN   0       _       _       _
+# 2       天氣    _       NOUN    NN      fPOS=NOUN++NN   0       _       _       _
+# 3       很      _       ADV     RB      fPOS=ADV++RB    0       _       _       _
+# 4       好      _       ADJ     JJ      fPOS=ADJ++JJ    0       _       _       _
 
 print parser['zh'].query(u'今天 天氣 很 好', returnRaw=True)
-# 1       今天    _       NOUN    NN      _       4       nmod:tmod       _       _
-# 2       天氣    _       NOUN    NN      _       4       nsubj   _       _
-# 3       很      _       ADV     RB      _       4       advmod  _       _
-# 4       好      _       ADJ     JJ      _       0       ROOT    _       _
+# 1       今天    _       NOUN    NN      fPOS=NOUN++NN   4       nmod:tmod       _       _
+# 2       天氣    _       NOUN    NN      fPOS=NOUN++NN   4       nsubj   _       _
+# 3       很      _       ADV     RB      fPOS=ADV++RB    4       advmod  _       _
+# 4       好      _       ADJ     JJ      fPOS=ADJ++JJ    0       ROOT    _       _
 ```
 
 ### Language Selection
