@@ -67,6 +67,7 @@ sink = gen_parser_ops.document_sink(sink_documents, task_context=task_context,
 
 
 def stdin_handler(signum, frame):
+    signal.alarm(600)
     tf_eval_epochs, tf_eval_metrics, tf_documents = sess.run([
         parser.evaluation['epochs'],
         parser.evaluation['eval_metrics'],
@@ -93,5 +94,5 @@ signal.signal(signal.SIGABRT, abort_handler)
 while True:
     sys.stdout.write('\n## input content:\n')
     sys.stdout.flush()
-    signal.alarm(1800)
+    signal.alarm(180)
     signal.pause()
