@@ -6,7 +6,7 @@ node('large') {
 
     stage('Test'){
         withDockerContainer('jenkins:syntaxnet') {
-            sh 'python test.py'
+            sh 'py.test .'
         }
     }
 
