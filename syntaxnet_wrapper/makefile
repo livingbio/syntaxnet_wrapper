@@ -4,6 +4,7 @@ configure_syntaxnet:
 	@echo "************************************************************" 1>&2
 	@echo "                  configure syntaxnet                       " 1>&2
 	@echo "************************************************************" 1>&2
+	rm -rf models
 	git clone --recursive https://github.com/tensorflow/models.git && \
 	cd models/syntaxnet/tensorflow && \
 	virtualenv /tmp/venv && \
