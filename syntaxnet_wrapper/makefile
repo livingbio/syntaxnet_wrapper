@@ -5,19 +5,23 @@ configure_syntaxnet:
 	@echo "                  configure syntaxnet                       " 1>&2
 	@echo "************************************************************" 1>&2
 	rm -rf models
-	git clone --recursive https://github.com/tensorflow/models.git && \
+	git clone --recursive https://github.com/tensorflow/models.git
+	rm -rf ~/tmp_syntaxnet
+	mkdir -p ~/tmp_syntaxnet
+	export TEST_TMPDIR=`cd ~/tmp_syntaxnet; pwd` && \
+	virtualenv ~/tmp_syntaxnet/venv && \
+	~/tmp_syntaxnet/venv/bin/pip install tensorflow && \
 	cd models/syntaxnet/tensorflow && \
-	virtualenv /tmp/venv && \
-	/tmp/venv/bin/pip install tensorflow && \
-	printf '/tmp/venv/bin/python\n\n\n\n\n\n\n\n\n\n\n\n\n\n' | ./configure
+	printf "$$TEST_TMPDIR/venv/bin/python\n\n\n\n\n\n\n\n\n\n\n\n\n\n" | ./configure
 
 build_syntaxnet: configure_syntaxnet
 	@echo "************************************************************" 1>&2
 	@echo "                     build syntaxnet                        " 1>&2
 	@echo "************************************************************" 1>&2
 	cd models/syntaxnet && \
-	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... || \
-	rm -rf bazel_root
+	export TEST_TMPDIR=`cd ~/tmp_syntaxnet; pwd` && \
+	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... && \
+	bazel --output_user_root=bazel_root build -c opt //dragnn/tools:parse-to-conll && \
 	cd models/syntaxnet && \
 	rm tensorflow/util/python/python_lib && \
 	ln -s `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"` tensorflow/util/python/python_lib
@@ -31,14 +35,15 @@ copy_demo_scripts: build_syntaxnet
 	cp models/syntaxnet/syntaxnet/models/parsey_universal/tokenize_zh.sh models/syntaxnet/tokenize_zh.sh
 
 clear_tmp_venv: copy_demo_scripts
-	rm -rf /tmp/venv
-	mkdir pids
+	rm -rf ~/tmp_syntaxnet
+	mkdir -p pids && \
 	chmod 777 pids
 	@echo "************************************************************" 1>&2
 	@echo "                 download language models                   " 1>&2
 	@echo "************************************************************" 1>&2
 
-download_language_models: models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek-PROIEL \
+download_language_models: \
+	models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek-PROIEL \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Ancient_Greek \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Arabic \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Basque \
@@ -89,7 +94,8 @@ download_language_models: models/syntaxnet/syntaxnet/models/parsey_universal/Anc
 	models/syntaxnet/syntaxnet/models/parsey_universal/Swedish-LinES \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Swedish \
 	models/syntaxnet/syntaxnet/models/parsey_universal/Tamil \
-	models/syntaxnet/syntaxnet/models/parsey_universal/Turkish
+	models/syntaxnet/syntaxnet/models/parsey_universal/Turkish \
+	download_dragnn_model
 
 models/syntaxnet/syntaxnet/models/parsey_universal/%: clear_tmp_venv
 	cd models/syntaxnet/syntaxnet/models/parsey_universal/ && \
@@ -100,3 +106,9 @@ models/syntaxnet/syntaxnet/models/parsey_universal/%: clear_tmp_venv
 	cd .. && \
 	chmod 755 $* && \
 	rm $*.zip
+
+download_dragnn_model:
+	cd models/syntaxnet/dragnn && \
+	wget https://gliacloud.blob.core.windows.net/nlp/conll17.tar.gz && \
+	tar xvfz conll17.tar.gz && \
+	rm conll17.tar.gz

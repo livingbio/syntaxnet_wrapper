@@ -50,8 +50,7 @@ tokenizer = structured_graph_builder.StructuredGraphBuilder(
     num_actions, feature_sizes, domain_sizes, embedding_dims,
     hidden_layer_sizes, gate_gradients=True, arg_prefix=tokenizer_arg_prefix,
     beam_size=beam_size, max_steps=max_steps)
-tokenizer.AddEvaluation(task_context, batch_size, corpus_name='stdin-untoken',
-                      evaluation_max_steps=max_steps)
+tokenizer.AddEvaluation(task_context, batch_size, corpus_name='stdin-untoken', evaluation_max_steps=max_steps)
 
 tokenizer.AddSaver(slim_model)
 sess.run(tokenizer.inits.values())
