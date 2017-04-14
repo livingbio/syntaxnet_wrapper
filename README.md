@@ -4,6 +4,13 @@
 
 ### Prerequisites
 
+#### Minimum Disk Space Requirement
+
+1. SyntaxNet sources: <100M
+2. SyntaxNet/DRAGNN binaries: 1.5G
+3. SyntaxNet models: 1.7G
+4. DRAGNN models: 2.1G
+
 #### Install OpenJDK8.
 
 ```shell-script
@@ -36,6 +43,15 @@ apt-get -y install swig unzip
 
 ```shell-script
 pip install tensorflow protobuf asciitree mock
+```
+
+**Note:** Current version of DRAGNN must be used with tensorflow r1.1.0. Since r1.1.0 is not released yet, you can install [nightly binaries](https://github.com/tensorflow/tensorflow#installation).
+
+Let's take linux version for Python 2.7 as an example:
+
+```shell-script
+wget https://ci.tensorflow.org/view/Nightly/job/nightly-matrix-cpu/TF_BUILD_IS_OPT=OPT,TF_BUILD_IS_PIP=PIP,TF_BUILD_PYTHON_VERSION=PYTHON2,label=cpu-slave/lastSuccessfulBuild/artifact/pip_test/whl/tensorflow-1.1.0rc1-cp27-none-linux_x86_64.whl
+pip install tensorflow-1.1.0rc1-cp27-none-linux_x86_64.whl
 ```
 
 
@@ -71,33 +87,19 @@ If the outputs are correct, problems are caused by the wrapper. If the outputs a
 ## Usage
 
 ```python
-from syntaxnet_wrapper import tagger, parser
-
-print tagger['en'].query('this is a good day', returnRaw=True)
-# 1       this    _       DET     DT      _       0       _       _       _
-# 2       is      _       VERB    VBZ     _       0       _       _       _
-# 3       a       _       DET     DT      _       0       _       _       _
-# 4       good    _       ADJ     JJ      _       0       _       _       _
-# 5       day     _       NOUN    NN      _       0       _       _       _
-tagger['en'].query('this is a good day')  # in default, return splitted text
+from syntaxnet_wrapper import parser
 
 print parser['en'].query('Alice drove down the street in her car', returnRaw=True)
-# 1       Alice   _       NOUN    NNP     _       2       nsubj   _       _
-# 2       drove   _       VERB    VBD     _       0       ROOT    _       _
-# 3       down    _       ADP     IN      _       2       prep    _       _
+# 1       Alice   _       ADV     RB      _       2       nsubj   _       _
+# 2       drove   _       VERB    VB      _       0       root    _       _
+# 3       down    _       ADP     RP      _       2       compound:prt    _       _
 # 4       the     _       DET     DT      _       5       det     _       _
-# 5       street  _       NOUN    NN      _       3       pobj    _       _
-# 6       in      _       ADP     IN      _       2       prep    _       _
-# 7       her     _       PRON    PRP$    _       8       poss    _       _
-# 8       car     _       NOUN    NN      _       6       pobj    _       _
+# 5       street  _       NOUN    NN      _       2       obj     _       _
+# 6       in      _       ADP     IN      _       8       case    _       _
+# 7       her     _       PRON    PRP$    _       8       nmod:poss       _       _
+# 8       car     _       NOUN    NN      _       5       nmod    _       _
 
 # use Chinese model
-print tagger['zh'].query(u'今天 天氣 很 好', returnRaw=True)
-# 1       今天    _       NOUN    NN      fPOS=NOUN++NN   0       _       _       _
-# 2       天氣    _       NOUN    NN      fPOS=NOUN++NN   0       _       _       _
-# 3       很      _       ADV     RB      fPOS=ADV++RB    0       _       _       _
-# 4       好      _       ADJ     JJ      fPOS=ADJ++JJ    0       _       _       _
-
 print parser['zh'].query(u'今天 天氣 很 好', returnRaw=True)
 # 1       今天    _       NOUN    NN      fPOS=NOUN++NN   4       nmod:tmod       _       _
 # 2       天氣    _       NOUN    NN      fPOS=NOUN++NN   4       nsubj   _       _
@@ -107,12 +109,7 @@ print parser['zh'].query(u'今天 天氣 很 好', returnRaw=True)
 
 ### Language Selection
 
-The default model is `'English-Parsey'`. This is
-[announced by Google](https://research.googleblog.com/2016/05/announcing-syntaxnet-worlds-most.html)
-on May, 2016.
-Other models, includes `'English'`, are trained by [Universal Dependencies](http://universaldependencies.org/),
-[announced by Google](https://research.googleblog.com/2016/08/meet-parseys-cousins-syntax-for-40.html)
-on August, 2016.
+DRAGNN framework was [announced by Google](https://research.googleblog.com/2017/03/an-upgrade-to-syntaxnet-new-models-and.html) on March, 2017. These models were downloaded form [here](https://drive.google.com/file/d/0BxpbZGYVZsEeSFdrUnBNMUp1YzQ/view?usp=sharing).
 
 ```python
 from syntaxnet_wrapper import language_code_to_model_name
@@ -124,8 +121,7 @@ language_code_to_model_name
 #  'da': 'Danish',
 #  'de': 'German',
 #  'el': 'Greek',
-#  'en': 'English-Parsey',
-#  'en-uni': 'English',
+#  'en': 'English',
 #  'es': 'Spanish',
 #  'et': 'Estonian',
 #  'eu': 'Basque',
@@ -140,19 +136,22 @@ language_code_to_model_name
 #  'id': 'Indonesian',
 #  'it': 'Italian',
 #  'iw': 'Hebrew',
+#  'ja': 'Japanese',
 #  'kk': 'Kazakh',
+#  'ko': 'Korean',
 #  'la': 'Latin',
 #  'lv': 'Latvian',
 #  'nl': 'Dutch',
-#  'no': 'Norwegian',
+#  'no': 'Norwegian-Bokmaal',
 #  'pl': 'Polish',
 #  'pt': 'Portuguese',
 #  'ro': 'Romanian',
 #  'ru': 'Russian',
 #  'sl': 'Slovenian',
 #  'sv': 'Swedish',
-#  'ta': 'Tamil',
 #  'tr': 'Turkish',
+#  'uk': 'Ukrainian',
+#  'vi': 'Vietnamese',
 #  'zh': 'Chinese',
 #  'zh-cn': 'Chinese',
 #  'zh-tw': 'Chinese'}

@@ -35,7 +35,7 @@ copy_demo_scripts: build_syntaxnet
 	cp models/syntaxnet/syntaxnet/models/parsey_universal/tokenize_zh.sh models/syntaxnet/tokenize_zh.sh
 
 clear_tmp_venv: copy_demo_scripts
-	#rm -rf ~/tmp_syntaxnet
+	rm -rf ~/tmp_syntaxnet
 	mkdir -p pids && \
 	chmod 777 pids
 	@echo "************************************************************" 1>&2

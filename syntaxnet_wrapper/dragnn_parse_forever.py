@@ -83,7 +83,7 @@ def post_parse(processed_sentence):
         sentence.ParseFromString(serialized_sentence)
         sent = []
         for i, token in enumerate(sentence.token):
-            item = {'pos': '_', 'ptb': '_'}
+            item = {'pos': '_', 'ptb': '_', 'head': -1}
             for field, value in sorted(token.ListFields())[::-1]:
                 if field.json_name == 'tag':
                     attrs = re.findall('(\w+): +\"([\w\+]+)\" +(\w+): +\"([\w\+\$]+)\"', token.tag)
@@ -97,11 +97,12 @@ def post_parse(processed_sentence):
                 elif field.json_name == 'word':
                     item['name'] = value
                 else:
-                    if field.json_name == 'label' and value == 'root':
-                        item['head'] = -1
                     if field.json_name == 'label' and value == 'punct':
                         item['pos'] = 'PUNCT'
-                        item['ptb'] = item['name'] if 'name' in item else '_'
+                        if 'name' in item:
+                            item['ptb'] = item['name'][0]
+                        else:
+                            item['ptb'] = '.'
                     item[field.json_name] = value
             sent.append(item)
         parsed_sents.append(sent)
@@ -161,7 +162,7 @@ if __name__ == '__main__':
             for i, word in enumerate(sent):
                 conll = '\t'.join([str(i + 1), word['name'], '_', word['pos'], word['ptb'], '_',
                                    str(word['head'] + 1), word['label'], '_', '_'])
-                print(conll)
+                print(conll.encode('utf8'))
             print()
         sys.stdout.write('\n## result end\n')
         sys.stdout.flush()

@@ -1,7 +1,10 @@
-from .syntaxnet_class import SyntaxNetParser, SyntaxNetTagger
+# from .syntaxnet_class import SyntaxNetParser as WrapParser
+# from .syntaxnet_class import SyntaxNetTagger as WrapTagger
+from .dragnn_class import DragnnParser as WrapParser
 
-__all__ = ['parser', 'tagger', 'language_code_to_model_name', 'parse_text', 'tag_text']
+__all__ = ['parser', 'language_code_to_model_name', 'parse_text']
 
+# reference: https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes
 language_code_to_model_name = {
     'ar': 'Arabic',
     'eu': 'Basque',
@@ -14,7 +17,7 @@ language_code_to_model_name = {
     'cs': 'Czech',
     'da': 'Danish',
     'nl': 'Dutch',
-    'en': 'English-Parsey',
+    'en': 'English',
     'et': 'Estonian',
     'fi': 'Finnish',
     'fr': 'French',
@@ -26,11 +29,13 @@ language_code_to_model_name = {
     'hu': 'Hungarian',
     'id': 'Indonesian',
     'ga': 'Irish',
+    'ja': 'Japanese',
     'it': 'Italian',
     'kk': 'Kazakh',
+    'ko': 'Korean',
     'la': 'Latin',
     'lv': 'Latvian',
-    'no': 'Norwegian',
+    'no': 'Norwegian-Bokmaal',
     'fa': 'Persian',
     'pl': 'Polish',
     'pt': 'Portuguese',
@@ -39,32 +44,10 @@ language_code_to_model_name = {
     'sl': 'Slovenian',
     'es': 'Spanish',
     'sv': 'Swedish',
-    'ta': 'Tamil',
     'tr': 'Turkish',
+    'uk': 'Ukrainian',
+    'vi': 'Vietnamese',
 }
-
-
-class Tagger(object):
-    cached = {}
-
-    def __del__(self):
-        for code in self.cached:
-            tmp = self.cached[code]
-            self.cached[code] = None
-            del tmp
-
-    def __getitem__(self, code):
-        if code not in language_code_to_model_name:
-            raise ValueError(
-                'Invalid language code for tagger: {}'.format(code))
-        lang = language_code_to_model_name[code]
-        if code in self.cached:
-            return self.cached[code]
-        self.cached[code] = SyntaxNetTagger(lang)
-        return self.cached[code]
-
-
-tagger = Tagger()
 
 
 class Parser(object):
@@ -78,12 +61,11 @@ class Parser(object):
 
     def __getitem__(self, code):
         if code not in language_code_to_model_name:
-            raise ValueError(
-                'Invalid language code for parser: {}'.format(code))
+            raise ValueError('Invalid language code for parser: {}'.format(code))
         lang = language_code_to_model_name[code]
         if code in self.cached:
             return self.cached[code]
-        self.cached[code] = SyntaxNetParser(lang, tagger=tagger[code])
+        self.cached[code] = WrapParser(lang)
         return self.cached[code]
 
 
@@ -92,22 +74,10 @@ parser = Parser()
 
 def parse_text(text, lang='en', returnRaw=True):
     lang = language_code_to_model_name[lang]
-    tagger, parser = None, None
+    parser = None
     try:
-        tagger = SyntaxNetTagger(lang)
-        parser = SyntaxNetParser(lang, tagger=tagger)
+        parser = WrapParser(lang)
         result = parser.query(text, returnRaw)
         return result
     finally:
-        del tagger, parser
-
-
-def tag_text(text, lang='en', returnRaw=True):
-    lang = language_code_to_model_name[lang]
-    tagger = None
-    try:
-        tagger = SyntaxNetTagger(lang)
-        result = tagger.query(text, returnRaw)
-        return result
-    finally:
-        del tagger
+        del parser
