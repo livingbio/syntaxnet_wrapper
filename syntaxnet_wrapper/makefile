@@ -21,9 +21,7 @@ build_syntaxnet: configure_syntaxnet
 	cd models/syntaxnet && \
 	export TEST_TMPDIR=`cd ~/tmp_syntaxnet; pwd` && \
 	bazel --output_user_root=bazel_root test syntaxnet/... util/utf8/... && \
-	bazel build -c opt //dragnn/tools:parse-to-conll && \
-	bazel build -c opt //examples/dragnn:tutorial_1 && \
-	bazel build -c opt //examples/dragnn:tutorial_2
+	bazel --output_user_root=bazel_root build -c opt //dragnn/tools:parse-to-conll && \
 	cd models/syntaxnet && \
 	rm tensorflow/util/python/python_lib && \
 	ln -s `python -c "from distutils.sysconfig import get_python_lib; print(get_python_lib())"` tensorflow/util/python/python_lib
