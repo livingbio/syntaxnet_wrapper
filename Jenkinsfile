@@ -5,6 +5,7 @@ node('large') {
     }
 
     stage('Test'){
+        sh 'docker images'
         withDockerContainer('jenkins:syntaxnet') {
             sh 'py.test .'
         }
