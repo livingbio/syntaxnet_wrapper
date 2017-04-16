@@ -1,5 +1,6 @@
 FROM gliacloud/base_images:django
 
+run apt-get update
 run apt-get install python-software-properties software-properties-common python-software-properties  -y
 
 #RUN echo "deb http://ppa.launchpad.net/webupd8team/java/ubuntu trusty main" | tee -a /etc/apt/sources.list
