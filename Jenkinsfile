@@ -1,14 +1,14 @@
 library 'common'
 
-node('large'){
+node('small'){
+    def project='syntaxnet'
     base_build{
-        name='syntaxnet
+        name=project
         test_script = {->
             sh 'py.test pyknp'
         }
         release = {->
-            sh 'echo release'
-            dockerhub.push_image(name)
+            dockerhub.push_image(project, base_build.release_version())
         }
     }
 }
