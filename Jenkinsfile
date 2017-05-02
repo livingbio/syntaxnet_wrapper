@@ -1,6 +1,6 @@
 library 'common'
 
-node('small'){
+node('large'){
     def project='syntaxnet'
     base_build{
         name=project
