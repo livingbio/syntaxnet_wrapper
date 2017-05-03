@@ -45,6 +45,8 @@ RUN cp /tmp/makefile $SYNTAXNETDIR/makefile
 RUN cd $SYNTAXNETDIR && \ 
     make
 
-ADD . /work
-WORKDIR /work
+ADD . /opt/syntaxnet
+WORKDIR /opt/syntaxnet
 RUN python setup.py install 
+
+WORKDIR /
