@@ -5,7 +5,7 @@ node('large'){
     base_build{
         name=project
         test_script = {->
-            sh 'py.test pyknp'
+            sh 'python test.py'
         }
         release = {->
             dockerhub.push_image(project, base_build.release_version())
