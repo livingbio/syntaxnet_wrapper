@@ -48,3 +48,4 @@ RUN cd $SYNTAXNETDIR && \
 ADD . /work
 WORKDIR /work
 RUN python setup.py install 
+RUN python test.py
