@@ -51,4 +51,3 @@ RUN python setup.py install
 WORKDIR /opt/tensorflow/models/syntaxnet/
 RUN echo 'Bob brought the pizza to Alice.' | bash parse.sh syntaxnet/models/parsey_universal/English 2> /dev/null
 WORKDIR /opt/syntaxnet
-RUN python test.py
